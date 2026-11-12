@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>青柠笔记帮助中心 v3.0</title>
+<style>
+  * { box-sizing: border-box; }
+  @page { size: A4; margin: 18mm 20mm 16mm; }
+  body {
+    margin: 0;
+    color: #1f2937;
+    font-family: "PingFang SC", "Hiragino Sans GB", "Heiti SC", "Microsoft YaHei", sans-serif;
+    font-size: 10.5pt;
+    line-height: 1.75;
+  }
+  .cover {
+    height: 244mm;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 6mm 0 4mm;
+    break-after: page;
+  }
+  .cover .top-rule { height: 3pt; background: #0f766e; width: 100%; }
+  .cover .kicker {
+    margin-top: 10mm;
+    color: #0f766e;
+    font-size: 10pt;
+    letter-spacing: 2.4pt;
+  }
+  .cover h1 {
+    border: 0;
+    padding: 0;
+    margin: 4mm 0 0;
+    font-size: 40pt;
+    line-height: 1.15;
+    color: #111827;
+    break-before: auto;
+  }
+  .cover .sub {
+    margin-top: 3mm;
+    font-size: 18pt;
+    color: #374151;
+    font-weight: 500;
+  }
+  .cover .desc {
+    margin-top: 6mm;
+    max-width: 150mm;
+    color: #4b5563;
+    font-size: 10.5pt;
+    line-height: 1.8;
+  }
+  .cover .meta-grid {
+    display: grid;
+    grid-template-columns: 32mm 1fr;
+    row-gap: 2.4mm;
+    margin-top: 10mm;
+    padding-top: 5mm;
+    border-top: 0.8pt solid #d1d5db;
+    font-size: 9.5pt;
+  }
+  .cover .meta-grid .k { color: #6b7280; }
+  .cover .meta-grid .v { color: #1f2937; }
+  .cover .bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    border-top: 0.8pt solid #d1d5db;
+    padding-top: 3mm;
+    color: #6b7280;
+    font-size: 8.8pt;
+  }
+  .cover .sim-badge {
+    display: inline-block;
+    border: 0.7pt solid #0f766e;
+    color: #0f766e;
+    padding: 0.8mm 2.4mm;
+    border-radius: 1.6mm;
+    font-size: 8.6pt;
+  }
+  .toc-page { break-after: page; }
+  .toc-page h1 {
+    break-before: auto;
+    font-size: 17pt;
+  }
+  .toc {
+    columns: 2;
+    column-gap: 12mm;
+    font-size: 9.4pt;
+    line-height: 1.7;
+  }
+  .toc .item { break-inside: avoid; margin-bottom: 1.2mm; }
+  .toc .num { color: #0f766e; font-weight: 600; margin-right: 1.6mm; }
+  .toc .sub { padding-left: 8mm; color: #4b5563; font-size: 8.8pt; margin-bottom: 0.8mm; }
+  h1 {
+    font-size: 19pt;
+    color: #0f766e;
+    border-bottom: 1.6pt solid #0f766e;
+    padding-bottom: 2.4mm;
+    margin: 0 0 5mm;
+    break-before: page;
+    break-after: avoid;
+  }
+  h1.first { break-before: auto; }
+  h2 {
+    font-size: 12.6pt;
+    color: #134e4a;
+    margin: 6.5mm 0 2.4mm;
+    break-after: avoid;
+  }
+  h3 {
+    font-size: 10.8pt;
+    color: #1f2937;
+    margin: 4.5mm 0 1.8mm;
+    break-after: avoid;
+  }
+  p { margin: 0 0 2.6mm; text-align: justify; }
+  ul, ol { margin: 0 0 3mm; padding-left: 6mm; }
+  li { margin-bottom: 1.2mm; }
+  .lead {
+    background: #f8fafc;
+    border: 0.6pt solid #e5e7eb;
+    padding: 3mm 4mm;
+    margin: 0 0 4mm;
+    color: #374151;
+    font-size: 9.8pt;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 2.6mm 0 4.5mm;
+    font-size: 9.1pt;
+    line-height: 1.55;
+  }
+  th {
+    background: #f0fdfa;
+    color: #134e4a;
+    text-align: left;
+    font-weight: 600;
+  }
+  th, td {
+    border: 0.6pt solid #d1d5db;
+    padding: 1.7mm 2.2mm;
+    vertical-align: top;
+  }
+  thead { display: table-header-group; }
+  tr { break-inside: avoid; }
+  .note {
+    background: #f0fdfa;
+    border-left: 3pt solid #0f766e;
+    padding: 2.6mm 3.4mm;
+    margin: 3mm 0;
+    font-size: 9.6pt;
+  }
+  .warn {
+    background: #fffbeb;
+    border-left: 3pt solid #d97706;
+    padding: 2.6mm 3.4mm;
+    margin: 3mm 0;
+    font-size: 9.6pt;
+  }
+  .note b, .warn b { color: #111827; }
+  .kv {
+    display: grid;
+    grid-template-columns: 34mm 1fr;
+    row-gap: 1.6mm;
+    margin: 2.4mm 0 4mm;
+    font-size: 9.6pt;
+  }
+  .kv .k { color: #6b7280; }
+  .kv .v { color: #1f2937; }
+  .small { color: #6b7280; font-size: 8.8pt; }
+  code {
+    font-family: "SFMono-Regular", Menlo, Consolas, monospace;
+    background: #f3f4f6;
+    padding: 0.2mm 1.2mm;
+    border-radius: 1mm;
+    font-size: 9pt;
+  }
+  .trouble th { width: 28%; }
+  .avoid-break { break-inside: avoid; }
+</style>
+</head>
+<body>
+
+<section class="cover">
+  <div>
+    <div class="top-rule"></div>
+    <div class="kicker">产品文档 · HELP CENTER</div>
+    <h1>青柠笔记</h1>
+    <div class="sub">帮助中心 v3.0</div>
+    <div class="desc">
+      面向内容创作者与团队成员的完整使用说明：账号、发布、搜索、会员、报表、权限、数据与故障排查。
+      本文档覆盖 10 个章节、54 个小节，配套 100 条评测问题，用于检索与问答系统的效果验证。
+    </div>
+    <div class="meta-grid">
+      <div class="k">适用产品</div><div class="v">青柠笔记 App（iOS / Android）、Web 版</div>
+      <div class="k">文档版本</div><div class="v">v3.0（对应产品 3.0.2）</div>
+      <div class="k">更新日期</div><div class="v">2026-11-01</div>
+      <div class="k">文档编号</div><div class="v">QN-HELP-300</div>
+      <div class="k">数据性质</div><div class="v">模拟数据，仅用于 RAG 检索与问答评测</div>
+    </div>
+  </div>
+  <div class="bottom">
+    <span>青柠笔记 · 帮助中心</span>
+    <span class="sim-badge">模拟数据 · 非真实产品文档</span>
+  </div>
+</section>
+
+<section class="toc-page">
+  <h1 class="first">目录</h1>
+  <div class="toc">
+    <div class="item"><span class="num">1</span>账号与登录</div>
+    <div class="sub">1.1 注册方式　1.2 登录方式　1.3 忘记密码与账号找回　1.4 修改手机号 / 邮箱　1.5 注销账号　1.6 登录常见问题</div>
+    <div class="item"><span class="num">2</span>发布笔记</div>
+    <div class="sub">2.1 笔记类型　2.2 发布流程　2.3 草稿箱与定时发布　2.4 编辑与删除　2.5 发布失败排查　2.6 审核规则与申诉</div>
+    <div class="item"><span class="num">3</span>搜索与发现</div>
+    <div class="sub">3.1 搜索入口与范围　3.2 筛选与排序　3.3 搜索技巧　3.4 搜索无结果　3.5 搜索历史与推荐</div>
+    <div class="item"><span class="num">4</span>会员与订阅</div>
+    <div class="sub">4.1 会员权益　4.2 价格与周期　4.3 自动续费　4.4 发票　4.5 退款政策　4.6 到期后的数据</div>
+    <div class="item"><span class="num">5</span>报表中心</div>
+    <div class="sub">5.1 报表类型　5.2 查看与筛选　5.3 导出 Excel / CSV　5.4 定时报表　5.5 导出失败与乱码　5.6 数据口径</div>
+    <div class="item"><span class="num">6</span>团队与权限</div>
+    <div class="sub">6.1 团队空间　6.2 角色与权限　6.3 邀请成员　6.4 转移与移除　6.5 数据归属</div>
+    <div class="item"><span class="num">7</span>数据与备份</div>
+    <div class="sub">7.1 回收站　7.2 恢复笔记　7.3 导出个人数据　7.4 数据保留与删除　7.5 跨设备同步</div>
+    <div class="item"><span class="num">8</span>常见故障</div>
+    <div class="sub">8.1 上传失败　8.2 同步冲突　8.3 导出乱码 / 空白　8.4 页面白屏 / 卡顿　8.5 支付成功未到账　8.6 通知收不到</div>
+    <div class="item"><span class="num">9</span>版本差异（v2.8 → v3.0）</div>
+    <div class="sub">9.1 报表入口变更　9.2 导出格式变更　9.3 会员权益调整　9.4 旧链接兼容　9.5 迁移注意事项</div>
+    <div class="item"><span class="num">10</span>不支持与转人工</div>
+    <div class="sub">10.1 需人工处理的场景　10.2 联系人工客服　10.3 紧急问题　10.4 投诉与建议</div>
+    <div class="item"><span class="num">A</span>附录 A 术语表</div>
+    <div class="item"><span class="num">B</span>附录 B 数据口径补充</div>
+    <div class="item"><span class="num">C</span>附录 C 版本记录</div>
+  </div>
+  <div class="note" style="margin-top:8mm;">
+    <b>引用格式：</b>本文档按“章.节”编号，问答与评测中使用 <code>§5.3</code> 这样的形式标注出处。
+    文档中的所有价格、额度、时间为模拟值，仅用于测试检索、引用与拒答能力。
+  </div>
+</section>
+
+<main>
+
+<section class="chapter">
+<h1>1　账号与登录</h1>
+<p class="lead">本章说明账号的注册、登录、找回、改绑与注销。涉及账号归属的操作需要完成身份验证；无法验证时转人工处理，不在自动问答范围内承诺结果。</p>
+
+<h2 id="s1-1">1.1 注册方式</h2>
+<p>青柠笔记支持三种注册方式：手机号、微信、邮箱。注册完成后自动创建个人空间，昵称可稍后修改。</p>
+<ul>
+  <li><b>手机号：</b>支持中国大陆 +86 手机号，接收 6 位短信验证码。</li>
+  <li><b>微信：</b>在登录页选择“微信登录”，扫码或授权后自动创建账号，需补充手机号完成实名要求。</li>
+  <li><b>邮箱：</b>支持常见邮箱与企业邮箱，验证邮件 10 分钟内有效。</li>
+</ul>
+<div class="note"><b>提示：</b>一个手机号只能绑定一个青柠笔记账号。已绑定手机号再次注册会进入“找回账号”流程，而不是创建新账号。</div>
+
+<h2 id="s1-2">1.2 登录方式</h2>
+<p>已注册用户可以使用验证码登录、密码登录或微信扫码登录。同一账号最多同时在线 3 台设备，超出时最早登录的设备会被下线。</p>
+<table>
+  <thead><tr><th>方式</th><th>适用端</th><th>说明</th></tr></thead>
+  <tbody>
+    <tr><td>短信验证码</td><td>App / Web</td><td>输入手机号获取 6 位验证码，60 秒后可重发，10 分钟内有效。</td></tr>
+    <tr><td>密码</td><td>App / Web</td><td>需先在账号与安全中设置密码；连续输错 5 次锁定 30 分钟。</td></tr>
+    <tr><td>微信扫码</td><td>Web</td><td>使用已绑定微信扫码，确认后登录。</td></tr>
+  </tbody>
+</table>
+
+<h2 id="s1-3">1.3 忘记密码与账号找回</h2>
+<p>在登录页点击“忘记密码”，通过绑定手机号或邮箱验证后设置新密码。原手机号和邮箱都不可用时，进入人工申诉流程。</p>
+<ol>
+  <li>登录页 → 忘记密码 → 选择手机号或邮箱验证。</li>
+  <li>完成验证后设置 8–20 位新密码，需包含字母和数字。</li>
+  <li>原手机号 / 邮箱不可用：提交人工申诉，提供注册时间、最近登录设备、历史订单号中的任意两项。</li>
+</ol>
+<p>人工申诉在 1–3 个工作日内处理，结果通过原绑定邮箱或申诉时填写的联系方式通知。<b>账号找回涉及账号归属，自动问答只能说明流程，不能承诺找回结果。</b></p>
+
+<h2 id="s1-4">1.4 修改手机号 / 邮箱</h2>
+<p>路径：设置 → 账号与安全 → 手机号 / 邮箱 → 更换。修改手机号需要通过原手机号验证码；原手机号已停用时走人工申诉。修改邮箱需要向新邮箱发送验证邮件，同时通知原邮箱。</p>
+
+<h2 id="s1-5">1.5 注销账号</h2>
+<p>路径：设置 → 账号与安全 → 注销账号。提交后进入 <b>7 天冷静期</b>，冷静期内重新登录可撤销注销。冷静期结束后账号进入删除流程，数据在 30 天内彻底删除，且不可恢复。</p>
+<div class="warn"><b>注意：</b>注销不会退还会员费用；未到期的会员权益随账号一并失效。团队空间的所有者注销前需先转移所有权，否则无法提交注销。</div>
+
+<h2 id="s1-6">1.6 登录常见问题</h2>
+<table class="trouble">
+  <thead><tr><th>现象</th><th>处理方式</th></tr></thead>
+  <tbody>
+    <tr><td>收不到验证码</td><td>确认手机号无误；检查短信拦截、欠费、信号；60 秒后重发；连续 3 次失败可改用微信或邮箱登录。</td></tr>
+    <tr><td>提示账号异常</td><td>通常由异地登录或频繁操作触发。按页面提示完成手机号验证；无法验证时联系人工客服。</td></tr>
+    <tr><td>提示密码错误</td><td>连续输错 5 次会锁定 30 分钟；可改用验证码登录后重置密码。</td></tr>
+    <tr><td>换手机后登录不上</td><td>确认是否更换了绑定手机号；旧手机号停用需走人工申诉。</td></tr>
+  </tbody>
+</table>
+</section>
+
+<section class="chapter">
+<h1>2　发布笔记</h1>
+<p class="lead">本章说明笔记类型、发布流程、草稿与定时发布、编辑删除，以及发布失败和审核问题的处理。</p>
+
+<h2 id="s2-1">2.1 笔记类型</h2>
+<table>
+  <thead><tr><th>类型</th><th>规格</th><th>适用场景</th></tr></thead>
+  <tbody>
+    <tr><td>图文笔记</td><td>最多 18 张图片，单张 ≤ 20MB，支持 JPG / PNG</td><td>教程、清单、种草</td></tr>
+    <tr><td>视频笔记</td><td>时长 ≤ 15 分钟，文件 ≤ 2GB，支持 MP4 / MOV</td><td>演示、Vlog、测评</td></tr>
+    <tr><td>长文笔记</td><td>正文 ≤ 5 万字，可插入图片与表格</td><td>深度教程、复盘</td></tr>
+  </tbody>
+</table>
+
+<h2 id="s2-2">2.2 发布流程</h2>
+<ol>
+  <li>点击底部“+” → 选择“发布笔记”。</li>
+  <li>选择图片 / 视频，填写标题（≤ 20 字）和正文。</li>
+  <li>添加话题（最多 5 个）、选择封面（建议 3:4）、设置可见范围。</li>
+  <li>点击发布，内容进入审核，通常在 5 分钟内完成。</li>
+</ol>
+<p>发布后可在“我的 → 笔记管理”中查看状态：审核中、已发布、未通过。已发布笔记的互动数据从发布时刻开始统计。</p>
+
+<h2 id="s2-3">2.3 草稿箱与定时发布</h2>
+<p>编辑中的内容每 10 秒自动保存为草稿，草稿保留 7 天。路径：我的 → 草稿箱。定时发布支持选择未来 30 天内的任意时间，每个账号最多同时存在 20 条定时任务。</p>
+<div class="note"><b>提示：</b>定时发布到点后仍需经过审核；审核未通过时不会发布，结果通过站内信通知。</div>
+
+<h2 id="s2-4">2.4 编辑与删除</h2>
+<p>已发布笔记可编辑标题、正文、话题和封面，编辑后重新进入审核。删除后笔记进入回收站，保留 30 天（会员 90 天）；删除后该笔记的点赞、收藏、评论数据不再计入统计，恢复后互动数据不恢复。</p>
+
+<h2 id="s2-5">2.5 发布失败排查</h2>
+<table class="trouble">
+  <thead><tr><th>提示 / 现象</th><th>原因与处理</th></tr></thead>
+  <tbody>
+    <tr><td>图片过大</td><td>单张超过 20MB。压缩到 20MB 以内，或减少图片数量。</td></tr>
+    <tr><td>视频上传失败</td><td>超过 2GB 或格式不支持。转码为 MP4（H.264）后重试。</td></tr>
+    <tr><td>一直显示上传中</td><td>切换 Wi-Fi / 移动网络；关闭后台限制；确认剩余存储空间 ≥ 1GB。</td></tr>
+    <tr><td>提示内容违规</td><td>查看站内信中的违规说明；修改后可重新提交，申诉机会 1 次。</td></tr>
+    <tr><td>提示操作频繁</td><td>同一账号 1 小时内最多发布 10 条，稍后再试。</td></tr>
+  </tbody>
+</table>
+
+<h2 id="s2-6">2.6 审核规则与申诉</h2>
+<p>以下内容会被判定为违规：色情低俗、暴力血腥、违法违规、广告导流、侵犯版权、虚假信息。违规内容会被下架或仅自己可见。对审核结果有异议，可在站内信点击“申诉”，每个笔记有 1 次申诉机会，3 个工作日内给出结果。</p>
+</section>
+
+<section class="chapter">
+<h1>3　搜索与发现</h1>
+<p class="lead">本章说明搜索入口、范围、筛选排序、检索技巧，以及搜索无结果时的处理。搜索质量直接影响用户能否自助解决问题。</p>
+
+<h2 id="s3-1">3.1 搜索入口与范围</h2>
+<p>搜索框位于 App 首页顶部和 Web 版左上角。默认搜索范围为笔记、用户、话题三类，结果按综合相关性排序。搜索支持中文分词，但不支持正则表达式。</p>
+
+<h2 id="s3-2">3.2 筛选与排序</h2>
+<ul>
+  <li><b>排序：</b>综合、最新、最热、最多收藏。</li>
+  <li><b>时间：</b>不限、近 7 天、近 30 天、近 90 天。</li>
+  <li><b>类型：</b>全部、图文、视频、长文。</li>
+  <li><b>范围：</b>全部、我关注的、同城。</li>
+</ul>
+
+<h2 id="s3-3">3.3 搜索技巧</h2>
+<table>
+  <thead><tr><th>写法</th><th>作用</th><th>示例</th></tr></thead>
+  <tbody>
+    <tr><td>加引号</td><td>精确匹配短语</td><td><code>"报表导出"</code></td></tr>
+    <tr><td>减号</td><td>排除某个词</td><td><code>导出 -视频</code></td></tr>
+    <tr><td>话题标签</td><td>只搜某个话题下的内容</td><td><code>#效率工具</code></td></tr>
+    <tr><td>作者名</td><td>搜索某位用户的笔记</td><td><code>@青柠小助手</code></td></tr>
+  </tbody>
+</table>
+
+<h2 id="s3-4">3.4 搜索无结果</h2>
+<p>先检查是否有错别字，再尝试同义词或更短的关键词，并确认筛选条件没有过度收窄（例如同时选了“近 7 天 + 视频 + 同城”）。仍然没有结果时，可在结果页点击“反馈”，反馈会进入搜索质量队列。</p>
+
+<h2 id="s3-5">3.5 搜索历史与推荐</h2>
+<p>搜索历史保留 30 天，可在搜索页点击“清除历史”。推荐内容基于浏览、点赞、收藏和关注行为生成，目前不支持完全关闭；清除搜索历史可以降低历史查询对推荐的影响。</p>
+</section>
+
+<section class="chapter">
+<h1>4　会员与订阅</h1>
+<p class="lead">本章说明会员权益、价格周期、自动续费、发票、退款和到期后的数据处理。退款与特殊发票需要人工审核。</p>
+
+<h2 id="s4-1">4.1 会员权益</h2>
+<table>
+  <thead><tr><th>权益</th><th>免费用户</th><th>青柠会员</th></tr></thead>
+  <tbody>
+    <tr><td>去广告</td><td>否</td><td>是</td></tr>
+    <tr><td>高清封面</td><td>每月 5 张</td><td>不限</td></tr>
+    <tr><td>数据看板</td><td>近 7 天</td><td>近 90 天</td></tr>
+    <tr><td>批量导出</td><td>每月 3 次</td><td>每月 20 次</td></tr>
+    <tr><td>专属客服</td><td>否</td><td>是，优先排队</td></tr>
+  </tbody>
+</table>
+
+<h2 id="s4-2">4.2 价格与周期</h2>
+<p>会员支持月、季、年三种周期：月卡 ¥25，季卡 ¥68，年卡 ¥238。新用户首月 ¥9.9，仅限一次。价格以支付页面展示为准，活动价不影响已购周期。</p>
+
+<h2 id="s4-3">4.3 自动续费</h2>
+<p>购买月卡 / 季卡 / 年卡时默认开启自动续费。关闭路径：设置 → 会员 → 管理自动续费 → 关闭。关闭后当前周期结束不再扣款，权益保留至周期结束。</p>
+<div class="warn"><b>注意：</b>通过 App Store 购买的会员，自动续费需要在 Apple ID 的“订阅”中关闭，青柠笔记 App 内无法直接关闭。</div>
+
+<h2 id="s4-4">4.4 发票</h2>
+<p>会员订单支持电子普通发票和增值税专用发票。路径：设置 → 会员 → 发票申请。企业抬头需填写公司名称和税号；个人抬头仅支持普通发票。申请后 3 个工作日内发送到填写邮箱。</p>
+<p>发票抬头填写错误时，可在开具后 30 天内申请重开一次；跨月重开需联系人工客服。</p>
+
+<h2 id="s4-5">4.5 退款政策</h2>
+<p>会员属于虚拟服务。购买后 <b>7 天内且未使用会员权益</b>（未使用高清封面、数据看板、批量导出）可申请退款；已使用权益或超过 7 天不支持退款。自动续费扣款可在扣款后 7 天内提交申诉，由人工审核。</p>
+<div class="note"><b>提示：</b>退款需要人工处理。自动问答只能说明政策与入口，不能承诺退款结果，也不应代替用户提交申请。</div>
+
+<h2 id="s4-6">4.6 到期后的数据</h2>
+<p>会员到期后，笔记、粉丝、互动数据均保留；高清封面、90 天数据看板、批量导出额度恢复为免费用户标准。已导出的文件不受影响，已设置的定时报表会暂停，续费后恢复。</p>
+</section>
+
+<section class="chapter">
+<h1>5　报表中心</h1>
+<p class="lead">本章说明报表类型、查看与筛选、导出、定时报表、常见导出问题和数据口径。报表是帮助中心里检索频率最高的功能之一。</p>
+
+<h2 id="s5-1">5.1 报表类型</h2>
+<table>
+  <thead><tr><th>报表</th><th>核心指标</th><th>更新频率</th></tr></thead>
+  <tbody>
+    <tr><td>内容数据</td><td>曝光、阅读、点赞、收藏、评论、分享</td><td>每小时</td></tr>
+    <tr><td>粉丝数据</td><td>新增粉丝、取关、粉丝净增、粉丝画像</td><td>每日 08:00</td></tr>
+    <tr><td>互动数据</td><td>互动率、完播率、平均阅读时长</td><td>每小时</td></tr>
+    <tr><td>收益数据</td><td>税前收益、结算中、已结算</td><td>T+1</td></tr>
+  </tbody>
+</table>
+
+<h2 id="s5-2">5.2 查看与筛选</h2>
+<p>Web 版入口：左侧导航“报表中心”。App 入口：我的 → 创作中心 → 报表。支持按时间范围（近 7 天、近 30 天、近 90 天、自定义，最长 180 天）、笔记分组、对比周期筛选。筛选条件会保存在当前设备，下次进入自动恢复。</p>
+
+<h2 id="s5-3">5.3 导出 Excel / CSV</h2>
+<p>路径：报表中心 → 右上角“⋯” → 导出 → 选择 Excel（.xlsx）或 CSV。单次导出上限 <b>10 万行</b>，超过请按时间段拆分。导出任务在“导出记录”中下载，文件保留 7 天。</p>
+<ol>
+  <li>选择报表类型和时间范围。</li>
+  <li>点击右上角“⋯” → 导出。</li>
+  <li>选择格式：Excel（默认）或 CSV。</li>
+  <li>在“导出记录”查看进度，完成后下载。</li>
+</ol>
+<div class="note"><b>提示：</b>免费用户每月可导出 3 次，会员每月 20 次；超出后按钮置灰，需等待下月重置或升级会员。</div>
+
+<h2 id="s5-4">5.4 定时报表</h2>
+<p>定时报表支持每日 08:00 或每周一 08:00 发送，收件人为账号绑定邮箱，最多添加 3 个收件人。该功能仅会员可用。若未收到，先检查垃圾邮件和邮箱地址，再查看“定时报表”页面是否显示发送失败。</p>
+
+<h2 id="s5-5">5.5 导出失败与乱码</h2>
+<table class="trouble">
+  <thead><tr><th>现象</th><th>处理方式</th></tr></thead>
+  <tbody>
+    <tr><td>CSV 打开乱码</td><td>文件使用 UTF-8 BOM 编码。若仍乱码，用 Excel“数据 → 从文本/CSV”导入并选择 UTF-8。</td></tr>
+    <tr><td>导出文件为空</td><td>检查筛选时间范围内是否有数据；检查是否只选了没有内容的笔记分组。</td></tr>
+    <tr><td>提示超过行数上限</td><td>单次上限 10 万行，按时间段拆分导出。</td></tr>
+    <tr><td>导出按钮无反应</td><td>使用最新版 Chrome / Edge；关闭广告拦截插件；免费用户额度用尽时按钮会置灰。</td></tr>
+  </tbody>
+</table>
+
+<h2 id="s5-6">5.6 数据口径</h2>
+<ul>
+  <li><b>阅读量：</b>笔记详情页被打开的次数，同一用户同一天重复打开只计 1 次。</li>
+  <li><b>互动率：</b>（点赞 + 收藏 + 评论）÷ 阅读量。</li>
+  <li><b>粉丝净增：</b>新增粉丝 − 取关粉丝。</li>
+  <li><b>收益：</b>税前金额，T+1 更新；结算以财务打款为准。</li>
+</ul>
+<p>所有统计按北京时间（UTC+8）自然日计算，存在最多 2 小时延迟。</p>
+</section>
+
+<section class="chapter">
+<h1>6　团队与权限</h1>
+<p class="lead">本章说明团队空间、角色权限、成员邀请、所有权转移和数据归属。团队相关操作涉及权限，回答时必须说明角色限制。</p>
+
+<h2 id="s6-1">6.1 团队空间</h2>
+<p>每个账号默认拥有个人空间，可额外创建或加入团队空间。团队空间用于多人协作发布、共享素材和统一查看报表。个人空间与团队空间的数据相互独立。</p>
+
+<h2 id="s6-2">6.2 角色与权限</h2>
+<table>
+  <thead><tr><th>权限</th><th>所有者</th><th>管理员</th><th>编辑</th><th>只读</th></tr></thead>
+  <tbody>
+    <tr><td>发布 / 编辑自己的笔记</td><td>是</td><td>是</td><td>是</td><td>否</td></tr>
+    <tr><td>编辑他人的笔记</td><td>是</td><td>是</td><td>否</td><td>否</td></tr>
+    <tr><td>查看与导出报表</td><td>是</td><td>是</td><td>是</td><td>是</td></tr>
+    <tr><td>邀请 / 移除成员</td><td>是</td><td>是</td><td>否</td><td>否</td></tr>
+    <tr><td>转移所有权</td><td>是</td><td>否</td><td>否</td><td>否</td></tr>
+    <tr><td>查看账单</td><td>是</td><td>是</td><td>否</td><td>否</td></tr>
+  </tbody>
+</table>
+
+<h2 id="s6-3">6.3 邀请成员</h2>
+<p>路径：团队空间 → 成员 → 邀请。支持三种方式：邀请链接（7 天有效）、手机号邀请、批量导入 CSV（单次 ≤ 200 人）。被邀请人需要已有青柠笔记账号，或通过链接完成注册。</p>
+
+<h2 id="s6-4">6.4 转移与移除</h2>
+<p>转移所有权仅所有者可操作，需接收人确认后生效；转移后原所有者变为管理员。移除成员后，该成员在团队空间发布的内容保留，归属团队；其个人空间内容不受影响。成员也可以主动退出团队空间。</p>
+
+<h2 id="s6-5">6.5 数据归属</h2>
+<p>团队空间内发布的内容、素材和报表归团队所有；成员个人空间内容归个人所有。成员退出或被移除时，不能带走团队空间内容。团队空间注销需所有者先清空或转移内容。</p>
+</section>
+
+<section class="chapter">
+<h1>7　数据与备份</h1>
+<p class="lead">本章说明回收站、恢复、个人数据导出、删除策略和多端同步。涉及数据恢复的操作要明确时间窗口。</p>
+
+<h2 id="s7-1">7.1 回收站</h2>
+<p>删除的笔记进入回收站，普通用户保留 30 天，会员保留 90 天。回收站中的笔记不计入内容数据，也不能被搜索到。到期后自动彻底删除，无法恢复。</p>
+
+<h2 id="s7-2">7.2 恢复笔记</h2>
+<p>路径：我的 → 回收站 → 选择笔记 → 恢复。支持单条恢复和批量恢复，批量最多 50 条。恢复后笔记回到原分组，状态为“仅自己可见”，需要手动重新发布；点赞、收藏、评论等互动数据不恢复。</p>
+
+<h2 id="s7-3">7.3 导出个人数据</h2>
+<p>路径：设置 → 账号与安全 → 导出个人数据。导出范围包括笔记正文、图片、评论、粉丝列表和账号信息，格式为 JSON + HTML。提交后 48 小时内发送到绑定邮箱，下载链接 7 天有效。</p>
+
+<h2 id="s7-4">7.4 数据保留与删除</h2>
+<ul>
+  <li>注销账号：7 天冷静期，结束后 30 天内彻底删除。</li>
+  <li>回收站：普通用户 30 天，会员 90 天。</li>
+  <li>系统备份：保留 30 天，仅用于故障恢复，不对外提供。</li>
+  <li>日志：访问日志保留 180 天，用于安全审计。</li>
+</ul>
+
+<h2 id="s7-5">7.5 跨设备同步</h2>
+<p>笔记在多端实时同步，正常延迟在 5 秒内。多端同时编辑同一篇笔记时，系统保留两份副本，较新的标题后追加“冲突副本”，由用户手动合并。离线编辑会在恢复网络后自动上传。</p>
+</section>
+
+<section class="chapter">
+<h1>8　常见故障</h1>
+<p class="lead">本章按现象给出排查步骤。排查应优先让用户自助完成，仍无法解决时再转人工，并带上订单号、设备型号和发生时间。</p>
+
+<h2 id="s8-1">8.1 图片 / 视频上传失败</h2>
+<table class="trouble">
+  <thead><tr><th>检查项</th><th>标准</th></tr></thead>
+  <tbody>
+    <tr><td>文件大小</td><td>图片单张 ≤ 20MB；视频 ≤ 2GB</td></tr>
+    <tr><td>文件格式</td><td>图片 JPG / PNG；视频 MP4 / MOV</td></tr>
+    <tr><td>网络</td><td>切换 Wi-Fi / 移动网络，避免弱网</td></tr>
+    <tr><td>存储</td><td>设备剩余空间 ≥ 1GB</td></tr>
+    <tr><td>权限</td><td>App 已获得相册 / 相机 / 存储权限</td></tr>
+  </tbody>
+</table>
+
+<h2 id="s8-2">8.2 笔记同步冲突</h2>
+<p>现象：同一篇笔记在两台设备上修改，出现“冲突副本”。处理：打开两份副本对比，保留需要的内容，删除另一份。避免方式：同一时间只在一端编辑；关闭页面前沿等待同步完成。</p>
+
+<h2 id="s8-3">8.3 导出乱码 / 空白</h2>
+<p>乱码优先确认编码：CSV 为 UTF-8 BOM，Excel 直接双击即可；若使用旧版 Excel，走“数据 → 从文本/CSV”并选择 UTF-8。空白文件先检查时间范围和笔记分组是否有数据，再检查是否超过 10 万行上限。浏览器建议使用最新版 Chrome 或 Edge。</p>
+
+<h2 id="s8-4">8.4 页面白屏 / 卡顿</h2>
+<p>依次尝试：刷新页面、清除浏览器缓存、升级 App / 浏览器、切换网络、关闭其他占用内存的标签页。仍无法恢复时，在“帮助与客服”提交问题，附上设备型号、系统版本、发生时间和截图。</p>
+
+<h2 id="s8-5">8.5 支付成功但会员未到账</h2>
+<ol>
+  <li>等待 5 分钟，支付回调可能有延迟。</li>
+  <li>在“会员 → 订单记录”确认订单状态。</li>
+  <li>App Store 购买需在 Apple ID 的“购买记录”中确认。</li>
+  <li>超过 30 分钟仍未到账，联系人工客服并提供订单号。</li>
+</ol>
+
+<h2 id="s8-6">8.6 消息通知收不到</h2>
+<p>检查系统通知权限、App 内“设置 → 通知”开关、免打扰时段，以及是否被系统省电策略限制。Web 版还需允许浏览器通知权限。</p>
+</section>
+
+<section class="chapter">
+<h1>9　版本差异（v2.8 → v3.0）</h1>
+<p class="lead">本章说明升级后入口、格式和权益的变化。用户按旧文档操作失败时，优先核对版本章节。</p>
+
+<h2 id="s9-1">9.1 报表入口变更</h2>
+<p>v2.8 的报表入口在“我的 → 数据”，v3.0 迁移到独立的“报表中心”。旧入口保留 90 天，访问时自动跳转到新地址；90 天后旧入口下线。</p>
+
+<h2 id="s9-2">9.2 导出格式变更</h2>
+<p>v3.0 默认导出格式为 Excel（.xlsx），CSV 需要在导出弹窗中手动选择。v2.8 的 CSV 导出链接仍然可用，但计划于 2027-03-31 下线，建议尽快切换到新入口。</p>
+
+<h2 id="s9-3">9.3 会员权益调整</h2>
+<p>v3.0 新增“数据看板 90 天”；高清封面从“每月 5 张”调整为“不限”；批量导出从“每月 10 次”提升到“每月 20 次”。会员价格不变，已购周期内按新权益执行。</p>
+
+<h2 id="s9-4">9.4 旧链接兼容</h2>
+<p>v2.8 的 <code>/data/export</code> 链接会 302 跳转到 v3.0 的新地址，兼容期 90 天。收藏夹中的旧链接在兼容期内可用；兼容期结束后返回 404，需要从报表中心重新进入。</p>
+
+<h2 id="s9-5">9.5 迁移注意事项</h2>
+<ul>
+  <li>升级后首次登录会展示迁移提示，可跳过。</li>
+  <li>团队空间的自定义报表需要管理员重新保存一次。</li>
+  <li>定时报表的发送时间保持不变，但需要重新确认收件人邮箱。</li>
+  <li>v2.8 的导出记录保留 30 天，之后只在新报表中心可见。</li>
+</ul>
+</section>
+
+<section class="chapter">
+<h1>10　不支持与转人工</h1>
+<p class="lead">本章明确自动问答的边界。涉及资金、合同、账号归属、法律与安全的问题必须转人工，不能由 AI 直接承诺结果。</p>
+
+<h2 id="s10-1">10.1 需人工处理的场景</h2>
+<table>
+  <thead><tr><th>场景</th><th>原因</th><th>处理入口</th></tr></thead>
+  <tbody>
+    <tr><td>会员退款</td><td>需核验使用情况与支付渠道</td><td>在线客服 → 退款</td></tr>
+    <tr><td>发票重开 / 专票</td><td>需财务审核</td><td>在线客服 → 发票</td></tr>
+    <tr><td>账号找回</td><td>涉及账号归属</td><td>登录页 → 账号申诉</td></tr>
+    <tr><td>合同与商务合作</td><td>需商务团队处理</td><td>商务邮箱</td></tr>
+    <tr><td>法律、隐私、数据泄露</td><td>需合规团队介入</td><td>security@qingning.example</td></tr>
+    <tr><td>账号被盗 / 被冻结</td><td>需身份核验与安全处置</td><td>在线客服 → 紧急</td></tr>
+  </tbody>
+</table>
+
+<h2 id="s10-2">10.2 联系人工客服</h2>
+<div class="kv">
+  <div class="k">在线客服</div><div class="v">App：设置 → 帮助与客服 → 在线客服；Web：右下角“客服”</div>
+  <div class="k">服务时间</div><div class="v">每天 9:00–21:00（北京时间）</div>
+  <div class="k">响应时长</div><div class="v">工作时间内 30 分钟内首次响应；会员优先排队</div>
+  <div class="k">电话</div><div class="v">400-800-1234（工作日 9:00–18:00）</div>
+  <div class="k">商务合作</div><div class="v">bd@qingning.example</div>
+</div>
+
+<h2 id="s10-3">10.3 紧急问题</h2>
+<p><b>账号被盗：</b>立即修改密码并在“账号与安全”中冻结账号，然后联系在线客服。冻结期间账号无法登录，数据保留。<b>数据泄露：</b>发送邮件到 security@qingning.example，注明账号、泄露内容和发现时间，安全团队会在 2 小时内响应。</p>
+
+<h2 id="s10-4">10.4 投诉与建议</h2>
+<p>路径：在线客服 → 投诉与建议。投诉会在 48 小时内回复；对处理结果不满意可要求升级到客服主管。产品建议会进入需求池，不承诺采纳或排期。</p>
+</section>
+
+<section class="chapter">
+<h1>附录 A　术语表</h1>
+<table>
+  <thead><tr><th>术语</th><th>含义</th></tr></thead>
+  <tbody>
+    <tr><td>笔记</td><td>用户发布的图文、视频或长文内容</td></tr>
+    <tr><td>互动率</td><td>（点赞 + 收藏 + 评论）÷ 阅读量</td></tr>
+    <tr><td>粉丝净增</td><td>新增粉丝减去取关粉丝</td></tr>
+    <tr><td>T+1</td><td>次日更新，通常指收益数据</td></tr>
+    <tr><td>只读成员</td><td>只能查看和导出报表，不能发布或编辑内容</td></tr>
+    <tr><td>冲突副本</td><td>多端同时编辑时系统保留的第二份笔记</td></tr>
+    <tr><td>回收站</td><td>删除笔记的临时存放区，到期自动清除</td></tr>
+  </tbody>
+</table>
+
+<h1>附录 B　数据口径补充</h1>
+<ul>
+  <li>统计时区：北京时间（UTC+8），自然日 00:00–24:00。</li>
+  <li>阅读量去重：同一用户同一天重复打开同一笔记只计 1 次。</li>
+  <li>互动数据更新：内容数据每小时更新，粉丝数据每日 08:00 更新，收益数据 T+1。</li>
+  <li>数据延迟：所有报表最多存在 2 小时延迟；跨天数据以次日 08:00 为准。</li>
+  <li>导出数据：以导出时刻的报表快照为准，之后的变化不会回写到已导出文件。</li>
+</ul>
+
+<h1>附录 C　版本记录</h1>
+<table>
+  <thead><tr><th>版本</th><th>日期</th><th>变更</th></tr></thead>
+  <tbody>
+    <tr><td>v3.0</td><td>2026-11-01</td><td>新增报表中心；默认导出 xlsx；会员权益调整；新增数据看板 90 天</td></tr>
+    <tr><td>v2.8</td><td>2026-06-15</td><td>新增定时报表；支持 CSV 导出；团队空间权限细化</td></tr>
+    <tr><td>v2.6</td><td>2026-02-20</td><td>新增长文笔记；回收站支持批量恢复</td></tr>
+    <tr><td>v2.4</td><td>2025-10-08</td><td>新增会员体系；支持微信登录</td></tr>
+  </tbody>
+</table>
+<p class="small">本文档为模拟数据，仅用于检索与问答系统的评测，不代表任何真实产品的功能、价格或政策。</p>
+</section>
+
+</main>
+</body>
+</html>

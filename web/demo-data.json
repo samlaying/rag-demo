@@ -1,0 +1,298 @@
+{
+  "generatedAt": "2026-11-12T16:56:32.220Z",
+  "models": {
+    "embed": "Qwen/Qwen3-VL-Embedding-8B",
+    "rerank": "BAAI/bge-reranker-v2-m3",
+    "chat": "deepseek-ai/DeepSeek-V3.2"
+  },
+  "items": [
+    {
+      "question": "怎么把报表导出成 Excel",
+      "rewritten": "如何将报表导出为Excel文件",
+      "answer": "可以在报表中心将报表导出为Excel文件，单次最多导出10万行数据[1]。  \n操作步骤如下：  \n1. 在报表中心选择报表类型和时间范围。  \n2. 点击右上角的“⋯”菜单，选择“导出”。  \n3. 在弹窗中选择“Excel（.xlsx）”格式（v3.0版本为默认格式）[3]。  \n4. 导出任务可在“导出记录”中查看进度并下载文件，文件会保留7天[1]。  \n\n提示：免费用户每月可导出3次，会员每月20次；若导出按钮置灰，可能是额度已用尽或数据超过10万行上限[1][2]。",
+      "citations": [
+        {
+          "n": 1,
+          "section": "5.3",
+          "title": "导出 Excel / CSV",
+          "url": "https://help.qingning.example/v3/#s5-3",
+          "rerank": 0.992152988910675,
+          "sim": 0.5837884365331454
+        },
+        {
+          "n": 2,
+          "section": "5.5",
+          "title": "导出失败与乱码",
+          "url": "https://help.qingning.example/v3/#s5-5",
+          "rerank": 0.4954967200756073,
+          "sim": 0.5871393813015586
+        },
+        {
+          "n": 3,
+          "section": "9.2",
+          "title": "导出格式变更",
+          "url": "https://help.qingning.example/v3/#s9-2",
+          "rerank": 0.42710208892822266,
+          "sim": 0.5535982652233218
+        },
+        {
+          "n": 4,
+          "section": "8.3",
+          "title": "导出乱码 / 空白",
+          "url": "https://help.qingning.example/v3/#s8-3",
+          "rerank": 0.27077367901802063,
+          "sim": 0.586485746141908
+        },
+        {
+          "n": 5,
+          "section": "3.3",
+          "title": "搜索技巧",
+          "url": "https://help.qingning.example/v3/#s3-3",
+          "rerank": 0.04193393141031265,
+          "sim": 0.5292140390627744
+        }
+      ],
+      "elapsedMs": 9825
+    },
+    {
+      "question": "小书怎么发",
+      "rewritten": "如何发送电子书",
+      "answer": "在青柠笔记中，发布笔记（包括图文、视频、长文等）的操作是统一的。以下是发布笔记的步骤：\n\n1.  在App底部点击“+”号，选择“发布笔记”[1]。\n2.  选择你想要发布的图片或视频，并填写标题（不超过20字）和正文[1]。\n3.  添加话题（最多5个）、选择封面（建议3:4比例）、设置可见范围[1]。\n4.  点击“发布”，内容将进入审核，通常在5分钟内完成[1]。",
+      "citations": [
+        {
+          "n": 1,
+          "section": "2.2",
+          "title": "发布流程",
+          "url": "https://help.qingning.example/v3/#s2-2",
+          "rerank": 0.29416516423225403,
+          "sim": 0.5975258221330565
+        },
+        {
+          "n": 2,
+          "section": "7.3",
+          "title": "导出个人数据",
+          "url": "https://help.qingning.example/v3/#s7-3",
+          "rerank": 0.03437795490026474,
+          "sim": 0.6340684477413635
+        },
+        {
+          "n": 3,
+          "section": "2.1",
+          "title": "笔记类型",
+          "url": "https://help.qingning.example/v3/#s2-1",
+          "rerank": 0.015379632823169231,
+          "sim": 0.6055341229363423
+        },
+        {
+          "n": 4,
+          "section": "2.6",
+          "title": "审核规则与申诉",
+          "url": "https://help.qingning.example/v3/#s2-6",
+          "rerank": 0.01257852092385292,
+          "sim": 0.5916135778298837
+        },
+        {
+          "n": 5,
+          "section": "5.4",
+          "title": "定时报表",
+          "url": "https://help.qingning.example/v3/#s5-4",
+          "rerank": 0.005845669656991959,
+          "sim": 0.5953002633268235
+        }
+      ],
+      "elapsedMs": 11263
+    },
+    {
+      "question": "会员咋退订",
+      "rewritten": "如何取消会员订阅",
+      "answer": "会员退订需关闭自动续费，当前会员权益保留至周期结束。具体操作步骤如下：\n1. 在青柠笔记 App 内，进入“设置” → “会员” → “管理自动续费” → 选择“关闭”[2]。\n2. 关闭后，当前会员周期结束后将不再自动扣款，但已购买的会员权益可继续使用至周期结束[2]。\n3. 若您是通过 App Store 购买的会员，则需要在 Apple ID 的“订阅”设置中关闭自动续费，青柠笔记 App 内无法直接操作[2]。\n4. 请注意，关闭自动续费不等于退款。如需申请退款，请根据退款政策（购买后7天内且未使用会员权益）通过人工渠道提交申诉[1]。",
+      "citations": [
+        {
+          "n": 1,
+          "section": "4.5",
+          "title": "退款政策",
+          "url": "https://help.qingning.example/v3/#s4-5",
+          "rerank": 0.8016440868377686,
+          "sim": 0.5663177424667435
+        },
+        {
+          "n": 2,
+          "section": "4.3",
+          "title": "自动续费",
+          "url": "https://help.qingning.example/v3/#s4-3",
+          "rerank": 0.7791719436645508,
+          "sim": 0.5439188313996202
+        },
+        {
+          "n": 3,
+          "section": "1.5",
+          "title": "注销账号",
+          "url": "https://help.qingning.example/v3/#s1-5",
+          "rerank": 0.3293803632259369,
+          "sim": 0.5784273645066176
+        },
+        {
+          "n": 4,
+          "section": "4.6",
+          "title": "到期后的数据",
+          "url": "https://help.qingning.example/v3/#s4-6",
+          "rerank": 0.10460405051708221,
+          "sim": 0.5985148544796468
+        },
+        {
+          "n": 5,
+          "section": "4.4",
+          "title": "发票",
+          "url": "https://help.qingning.example/v3/#s4-4",
+          "rerank": 0.07707035541534424,
+          "sim": 0.46453591806322136
+        }
+      ],
+      "elapsedMs": 10300
+    },
+    {
+      "question": "收益数据怎么导出",
+      "rewritten": "收益数据如何导出",
+      "answer": "收益数据可通过报表中心的导出功能获取[1]。  \n操作步骤如下：  \n1. 在报表中心选择报表类型和时间范围[1]。  \n2. 点击右上角“⋯”菜单，选择“导出”[1]。  \n3. 选择导出格式为 Excel 或 CSV[1]。  \n4. 在“导出记录”中查看进度并下载文件（文件保留 7 天）[1]。",
+      "citations": [
+        {
+          "n": 1,
+          "section": "5.3",
+          "title": "导出 Excel / CSV",
+          "url": "https://help.qingning.example/v3/#s5-3",
+          "rerank": 0.1130920797586441,
+          "sim": 0.5407818814755311
+        },
+        {
+          "n": 2,
+          "section": "7.3",
+          "title": "导出个人数据",
+          "url": "https://help.qingning.example/v3/#s7-3",
+          "rerank": 0.06365892291069031,
+          "sim": 0.6126862699578884
+        },
+        {
+          "n": 3,
+          "section": "4.6",
+          "title": "到期后的数据",
+          "url": "https://help.qingning.example/v3/#s4-6",
+          "rerank": 0.01650063693523407,
+          "sim": 0.6381458186724915
+        },
+        {
+          "n": 4,
+          "section": "9.3",
+          "title": "会员权益调整",
+          "url": "https://help.qingning.example/v3/#s9-3",
+          "rerank": 0.008319063112139702,
+          "sim": 0.5499631217225504
+        },
+        {
+          "n": 5,
+          "section": "9.2",
+          "title": "导出格式变更",
+          "url": "https://help.qingning.example/v3/#s9-2",
+          "rerank": 0.007704529445618391,
+          "sim": 0.5413720850959821
+        }
+      ],
+      "elapsedMs": 8441
+    },
+    {
+      "question": "我要退款",
+      "rewritten": "如何申请退款",
+      "answer": "根据政策，会员退款需人工审核[1]。请按以下步骤操作：\n1. 确认购买是否在7天内且未使用会员权益（如高清封面、数据看板、批量导出）[1]。\n2. 如符合条件，打开青柠笔记App，进入“在线客服”[3]。\n3. 在客服界面选择“退款”入口提交申请[3]。\n4. 等待人工客服核验使用情况与支付渠道后处理[3]。",
+      "citations": [
+        {
+          "n": 1,
+          "section": "4.5",
+          "title": "退款政策",
+          "url": "https://help.qingning.example/v3/#s4-5",
+          "rerank": 0.6390290856361389,
+          "sim": 0.6170218511619696
+        },
+        {
+          "n": 2,
+          "section": "4.4",
+          "title": "发票",
+          "url": "https://help.qingning.example/v3/#s4-4",
+          "rerank": 0.1599121391773224,
+          "sim": 0.5252867001449147
+        },
+        {
+          "n": 3,
+          "section": "10.1",
+          "title": "需人工处理的场景",
+          "url": "https://help.qingning.example/v3/#s10-1",
+          "rerank": 0.017059504985809326,
+          "sim": 0.5361876746278843
+        },
+        {
+          "n": 4,
+          "section": "2.6",
+          "title": "审核规则与申诉",
+          "url": "https://help.qingning.example/v3/#s2-6",
+          "rerank": 0.015308926813304424,
+          "sim": 0.5144753412191931
+        },
+        {
+          "n": 5,
+          "section": "1.4",
+          "title": "修改手机号 / 邮箱",
+          "url": "https://help.qingning.example/v3/#s1-4",
+          "rerank": 0.014125089161098003,
+          "sim": 0.5757596437050169
+        }
+      ],
+      "elapsedMs": 8652
+    },
+    {
+      "question": "明天天气怎么样",
+      "rewritten": "明天天气预报如何",
+      "answer": "未找到相关内容。",
+      "citations": [
+        {
+          "n": 1,
+          "section": "4.2",
+          "title": "价格与周期",
+          "url": "https://help.qingning.example/v3/#s4-2",
+          "rerank": 0.000025781333533814177,
+          "sim": 0.36909133920357823
+        },
+        {
+          "n": 2,
+          "section": "1.1",
+          "title": "注册方式",
+          "url": "https://help.qingning.example/v3/#s1-1",
+          "rerank": 0.000025131224901997484,
+          "sim": 0.33291737358635926
+        },
+        {
+          "n": 3,
+          "section": "1.6",
+          "title": "登录常见问题",
+          "url": "https://help.qingning.example/v3/#s1-6",
+          "rerank": 0.000022285339582595043,
+          "sim": 0.3504088635866453
+        },
+        {
+          "n": 4,
+          "section": "1.2",
+          "title": "登录方式",
+          "url": "https://help.qingning.example/v3/#s1-2",
+          "rerank": 0.00001982353387575131,
+          "sim": 0.35191001832506547
+        },
+        {
+          "n": 5,
+          "section": "2.3",
+          "title": "草稿箱与定时发布",
+          "url": "https://help.qingning.example/v3/#s2-3",
+          "rerank": 0.000019002152839675546,
+          "sim": 0.3886098525994324
+        }
+      ],
+      "elapsedMs": 3018
+    }
+  ]
+}

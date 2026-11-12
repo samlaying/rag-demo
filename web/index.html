@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>青柠笔记 RAG Demo · 把帮助中心变成能回答的搜索</title>
+<meta name="description" content="解析 → 切片 → embedding → 索引 → 混合召回 → rerank → prompt → 引用 → 评测。一个可运行的帮助中心 RAG 演示。">
+<link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+
+<header class="nav">
+  <a class="brand" href="#top">
+    <span class="brand-mark">青</span>
+    <span class="brand-text">青柠笔记 <em>RAG Demo</em></span>
+  </a>
+  <nav class="nav-links">
+    <a href="#demo">在线演示</a>
+    <a href="#metrics">评测结果</a>
+    <a href="#arch">架构</a>
+    <a href="#repo" class="nav-cta">GitHub / CLI</a>
+  </nav>
+</header>
+
+<main id="top">
+
+  <section class="hero">
+    <div class="hero-glow"></div>
+    <div class="hero-grid"></div>
+    <div class="hero-inner">
+      <div class="badge"><span class="pulse"></span> RAG · SiliconFlow · 54 chunks</div>
+      <h1>把帮助中心<br><span class="grad">变成能回答的搜索</span></h1>
+      <p class="lead">
+        用户不再需要反复改关键词。输入一句自然语言，系统先检索、再重排、
+        最后带着引用回答；资料没有覆盖时明确说“没找到”，涉及退款与账号安全时转人工。
+      </p>
+      <div class="actions">
+        <a class="btn primary" href="#demo">在线试用 <span>→</span></a>
+        <a class="btn ghost" href="#repo">查看仓库</a>
+      </div>
+      <div class="stat-row">
+        <div class="stat"><strong>54</strong><span>知识库切片</span></div>
+        <div class="stat"><strong>100</strong><span>评测问题</span></div>
+        <div class="stat"><strong>11/11</strong><span>Recall@5</span></div>
+        <div class="stat"><strong>2 类</strong><span>拒答 / 转人工</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="problem">
+    <div class="section-head">
+      <span class="eyebrow">PROBLEM</span>
+      <h2>搜索解决不了的问题，不是“再搜一次”</h2>
+      <p>精确匹配、文档孤岛、反复改词——这三件事叠在一起，用户最后只能去问客服。</p>
+    </div>
+    <div class="problem-grid">
+      <article class="card problem-card">
+        <span class="num">01</span>
+        <h3>精确匹配，容错极差</h3>
+        <p>搜「小红书」有结果，搜「小书」就没有。错别字、别名、口语全部落在召回之外。</p>
+        <div class="mini-code">query: 小书怎么发 → 0 results</div>
+      </article>
+      <article class="card problem-card">
+        <span class="num">02</span>
+        <h3>帮助文档是孤岛</h3>
+        <p>功能说明、FAQ、版本差异散落在文档里，站内搜索搜不到，用户只能转客服。</p>
+        <div class="mini-code">docs: 54 节 · 可被搜到: 未知</div>
+      </article>
+      <article class="card problem-card">
+        <span class="num">03</span>
+        <h3>一次检索解决不了</h3>
+        <p>同一个问题要换 3–5 次关键词。用户要的不是更多结果，而是一个能执行的答案。</p>
+        <div class="mini-code">attempts: 3.4 次 / 问题</div>
+      </article>
+    </div>
+    <p class="section-note">
+      RAG 不是加一个聊天框，而是把 <b>检索、回答、引用、拒答、评测</b> 连成一条可验证的链路。
+    </p>
+  </section>
+
+  <section class="section" id="arch">
+    <div class="section-head">
+      <span class="eyebrow">PIPELINE</span>
+      <h2>一条链路，九个环节</h2>
+      <p>每个环节都可替换：换模型、换召回、换重排，不影响其他部分。</p>
+    </div>
+    <div class="pipeline">
+      <div class="step"><span class="step-n">1</span><b>解析</b><small>HTML / PDF</small></div>
+      <div class="step"><span class="step-n">2</span><b>切片</b><small>按 §章.节</small></div>
+      <div class="step"><span class="step-n">3</span><b>Embedding</b><small>4096 维</small></div>
+      <div class="step"><span class="step-n">4</span><b>索引</b><small>54 chunks</small></div>
+      <div class="step"><span class="step-n">5</span><b>混合召回</b><small>向量 + BM25</small></div>
+      <div class="step"><span class="step-n">6</span><b>Rerank</b><small>top 12 → 5</small></div>
+      <div class="step"><span class="step-n">7</span><b>Prompt</b><small>只依据资料</small></div>
+      <div class="step"><span class="step-n">8</span><b>引用</b><small>[n] + 原文链接</small></div>
+      <div class="step"><span class="step-n">9</span><b>评测</b><small>Recall / 拒答</small></div>
+    </div>
+    <div class="arch-note">
+      <span class="dot"></span>
+      关键设计：原始问题与改写问题<b>各召回一次、各 rerank 一次，取较高分</b>，避免改写跑偏时误伤正确文档。
+    </div>
+  </section>
+
+  <section class="section" id="demo">
+    <div class="section-head">
+      <span class="eyebrow">LIVE DEMO</span>
+      <h2>问一个帮助中心里的问题</h2>
+      <p>真实调用 SiliconFlow：查询改写 → 混合召回 → rerank → 生成。右侧是证据链。</p>
+    </div>
+
+    <div class="demo-grid">
+      <div class="panel chat-panel">
+        <div class="chips" id="chips"></div>
+        <form id="ask-form" class="ask-form">
+          <label class="sr-only" for="question">输入问题</label>
+          <input id="question" type="text" maxlength="200" autocomplete="off"
+                 placeholder="例如：怎么把报表导出成 Excel">
+          <button id="ask-btn" type="submit">提问</button>
+        </form>
+        <div class="mode-row">
+          <span id="mode" class="mode">检测后端中…</span>
+          <span id="elapsed" class="elapsed"></span>
+        </div>
+
+        <div id="answer" class="answer" aria-live="polite">
+          <div class="empty-state">
+            <span class="empty-icon">?</span>
+            <p>输入问题，或点上面的示例</p>
+            <small>示例覆盖：正常操作 / 错别字 / 应拒答 / 应转人工</small>
+          </div>
+        </div>
+      </div>
+
+      <aside class="panel evidence-panel">
+        <div class="panel-head">
+          <h3>证据链</h3>
+          <span class="hint">rerank / sim</span>
+        </div>
+        <div id="evidence" class="evidence-list">
+          <div class="empty-state small">提问后显示召回与重排分数</div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <section class="section" id="metrics">
+    <div class="section-head">
+      <span class="eyebrow">EVALUATION</span>
+      <h2>不是“看起来能答”，是跑分</h2>
+      <p>12 条抽样覆盖 7 种题型；全量 100 条可用 <code>rag-demo --eval 100</code> 复跑。</p>
+    </div>
+
+    <div class="metric-grid">
+      <div class="metric card"><strong>11/11</strong><span>Recall@12</span><small>候选里有正确章节</small></div>
+      <div class="metric card"><strong>11/11</strong><span>Recall@5</span><small>重排后仍在 top 5</small></div>
+      <div class="metric card"><strong>1/1</strong><span>拒答准确率</span><small>文档未覆盖时不编</small></div>
+      <div class="metric card"><strong>1/1</strong><span>转人工准确率</span><small>退款场景不承诺</small></div>
+      <div class="metric card"><strong>11/12</strong><span>引用标注率</span><small>未标的是拒答题</small></div>
+    </div>
+
+    <div class="table-wrap card">
+      <table>
+        <thead>
+          <tr><th>#</th><th>题型</th><th>问题</th><th>Recall@5</th><th>拒答 / 转人工</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>1</td><td>howto</td><td>怎么注册青柠笔记账号</td><td class="ok">✓</td><td>—</td></tr>
+          <tr><td>19</td><td>howto</td><td>怎么导出 Excel</td><td class="ok">✓</td><td>—</td></tr>
+          <tr><td>29</td><td>troubleshoot</td><td>笔记同步冲突怎么处理</td><td class="ok">✓</td><td>—</td></tr>
+          <tr><td>61</td><td>colloquial</td><td>“小书”怎么发</td><td class="ok">✓</td><td>—</td></tr>
+          <tr><td>65</td><td>colloquial</td><td>会员咋退订</td><td class="ok">✓</td><td>—</td></tr>
+          <tr><td>86</td><td>out_of_scope</td><td>青柠笔记什么时候上市</td><td class="muted">—</td><td class="ok">拒答 ✓</td></tr>
+          <tr><td>96</td><td>handoff</td><td>我要退款</td><td class="ok">✓</td><td class="ok">转人工 ✓</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="section" id="pitfall">
+    <div class="section-head">
+      <span class="eyebrow">FIELD NOTE</span>
+      <h2>一个只在批量 &gt; 8 时才出现的坑</h2>
+      <p>SiliconFlow embeddings 接口单批超过 8 条时，返回的 <code>index</code> 会每 8 条重置一次。</p>
+    </div>
+    <div class="pitfall-grid">
+      <div class="card code-card">
+        <div class="code-head"><span class="dots"><i></i><i></i><i></i></span>返回的 index</div>
+        <pre><code>// 传入 16 条，期望 0..15
+[0,1,2,3,4,5,6,7, 0,1,2,3,4,5,6,7]
+
+// 若按 index 排序，第二批向量整体错位
+// 现象：明明有正确文档，却召回不到</code></pre>
+      </div>
+      <div class="card fix-card">
+        <h3>修复</h3>
+        <p>不按 <code>index</code> 排序，按响应顺序与输入顺序对齐，并校验返回条数。</p>
+        <pre><code>if (r.data.length !== batch.length) throw ...
+for (const d of r.data) vectors.push(d.embedding);</code></pre>
+        <p class="small">这个 bug 很隐蔽：单条、8 条以内批量都正常，只有超过 8 条才出现。</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="repo">
+    <div class="section-head">
+      <span class="eyebrow">REPOSITORY & CLI</span>
+      <h2>一条命令复跑，或者把它做成产品</h2>
+      <p>无运行时依赖，只需要 Node 22+ 和一个 SiliconFlow Key。</p>
+    </div>
+
+    <div class="repo-grid">
+      <div class="card code-card">
+        <div class="code-head"><span class="dots"><i></i><i></i><i></i></span>终端</div>
+        <pre><code><span class="c">$</span> npm install
+<span class="c">$</span> npm run index
+<span class="c">$</span> npm run demo -- "怎么导出报表"
+<span class="c">$</span> npm run eval -- 12
+<span class="c">$</span> npm start
+<span class="c"># → http://127.0.0.1:3000</span></code></pre>
+      </div>
+      <div class="card repo-card">
+        <h3>仓库结构</h3>
+        <pre class="tree"><code>rag-demo/
+├─ src/rag.mjs        # 检索 + 生成库
+├─ src/server.mjs     # HTTP API + 静态站点
+├─ rag-demo.mjs       # CLI
+├─ web/               # 本站
+├─ data/              # PDF / CSV / 帮助中心
+├─ scripts/           # 构建演示数据
+└─ .github/workflows/ # CI</code></pre>
+        <div class="repo-actions">
+          <a class="btn primary" href="#" id="repo-link">GitHub 仓库</a>
+          <a class="btn ghost" href="./demo-data.json" download>下载演示数据</a>
+        </div>
+        <p class="small">发布：<code>gh repo create rag-demo --public --source=. --push</code></p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <div>
+    <span class="brand-mark small">青</span>
+    <span>青柠笔记 RAG Demo</span>
+  </div>
+  <p>模拟数据，仅用于检索与问答评测。模型：Qwen3-VL-Embedding · bge-reranker · DeepSeek-V3.2</p>
+</footer>
+
+<script src="./app.js"></script>
+</body>
+</html>
