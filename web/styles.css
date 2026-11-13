@@ -526,6 +526,56 @@ code { font-family: var(--mono); font-size: .92em; }
   font-size: 11.5px;
 }
 
+.mode-right { display: inline-flex; align-items: center; gap: 10px; }
+
+.link-btn {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--accent);
+  font-size: 11.5px;
+  cursor: pointer;
+}
+
+.link-btn:hover { text-decoration: underline; }
+
+.token-form { display: flex; gap: 8px; margin-top: 12px; }
+.token-form[hidden] { display: none; }
+
+.token-form input {
+  flex: 1;
+  min-width: 0;
+  height: 38px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: #fbfcfd;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  outline: none;
+}
+
+.token-form input:focus {
+  border-color: var(--accent-2);
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(20, 184, 166, .13);
+}
+
+.token-form button {
+  height: 38px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 9px;
+  background: var(--ink);
+  color: #fff;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.token-note { margin-top: 8px; color: var(--warn); font-size: 12px; }
+.token-note[hidden] { display: none; }
+
 .mode::before {
   content: "";
   display: inline-block;

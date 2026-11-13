@@ -13,7 +13,18 @@ const FALLBACK_PRESETS = [
   '明天天气怎么样'
 ];
 
+const TOKEN_KEY = 'rag_demo_token';
+const getToken = () => localStorage.getItem(TOKEN_KEY) || '';
+const setToken = t => t ? localStorage.setItem(TOKEN_KEY, t) : localStorage.removeItem(TOKEN_KEY);
+
 let currentQuestion = '';
+
+function showTokenForm(show, note = '') {
+  $('#token-form').hidden = !show;
+  $('#token-note').hidden = !note;
+  $('#token-note').textContent = note;
+  if (show) $('#token-input').focus();
+}
 
 function esc(s) {
   return String(s)
@@ -186,11 +197,20 @@ function setElapsed(ms) {
 }
 
 async function askLive(q) {
+  const token = getToken();
   const res = await fetch('/api/ask/stream', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {})
+    },
     body: JSON.stringify({ question: q })
   });
+
+  if (res.status === 401) {
+    showTokenForm(true, '访问口令不正确，请重新输入');
+    throw new Error('需要访问口令');
+  }
 
   if (!res.ok) {
     let message = `请求失败 (${res.status})`;
@@ -294,6 +314,10 @@ async function init() {
       const health = await res.json();
       state.mode = 'live';
       renderMode(health);
+      if (health.authRequired) {
+        $('#token-toggle').hidden = false;
+        if (!getToken()) showTokenForm(true);
+      }
     } else {
       renderMode();
     }
@@ -307,6 +331,24 @@ async function init() {
 $('#ask-form').addEventListener('submit', e => {
   e.preventDefault();
   ask($('#question').value);
+});
+
+$('#token-form').addEventListener('submit', e => {
+  e.preventDefault();
+  const token = $('#token-input').value.trim();
+  if (!token) return;
+  setToken(token);
+  showTokenForm(false);
+  $('#answer').innerHTML = `
+    <div class="empty-state">
+      <span class="empty-icon">✓</span>
+      <p>口令已保存</p>
+      <small>点上面的示例开始提问</small>
+    </div>`;
+});
+
+$('#token-toggle').addEventListener('click', () => {
+  showTokenForm($('#token-form').hidden);
 });
 
 init();

@@ -7,6 +7,7 @@ import { getIndex, answer, answerStream, CONFIG } from './rag.mjs';
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 const WEB = path.join(ROOT, 'web');
 const PORT = Number(process.env.PORT || 3000);
+const ACCESS_TOKEN = (process.env.ACCESS_TOKEN || '').trim();
 
 const MIME = {
   '.html': 'text/html; charset=utf-8',
@@ -22,6 +23,15 @@ function send(res, status, body, type = 'application/json; charset=utf-8') {
   const payload = typeof body === 'string' || Buffer.isBuffer(body) ? body : JSON.stringify(body);
   res.writeHead(status, { 'Content-Type': type, 'Cache-Control': 'no-store' });
   res.end(payload);
+}
+
+function isAuthorized(req) {
+  if (!ACCESS_TOKEN) return true;
+  const url = new URL(req.url, 'http://localhost');
+  const queryToken = url.searchParams.get('token') || '';
+  const header = req.headers.authorization || '';
+  const bearer = header.startsWith('Bearer ') ? header.slice(7).trim() : '';
+  return queryToken === ACCESS_TOKEN || bearer === ACCESS_TOKEN;
 }
 
 function serveStatic(req, res) {
@@ -80,11 +90,13 @@ const server = http.createServer(async (req, res) => {
         embed: CONFIG.embedModel,
         rerank: CONFIG.rerankModel,
         chat: CONFIG.chatModel
-      }
+      },
+      authRequired: Boolean(ACCESS_TOKEN)
     });
   }
 
   if (pathname === '/api/ask/stream' && req.method === 'POST') {
+    if (!isAuthorized(req)) return send(res, 401, { ok: false, error: 'unauthorized' });
     let body;
     try {
       body = await readJson(req);
@@ -120,6 +132,7 @@ const server = http.createServer(async (req, res) => {
   }
 
   if (pathname === '/api/ask' && req.method === 'POST') {
+    if (!isAuthorized(req)) return send(res, 401, { ok: false, error: 'unauthorized' });
     try {
       const body = await readJson(req);
       const question = String(body.question || '').trim();

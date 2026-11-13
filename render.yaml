@@ -13,3 +13,5 @@ services:
         value: "22"
       - key: SILICONFLOW_API_KEY
         sync: false
+      - key: ACCESS_TOKEN
+        sync: false

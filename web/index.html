@@ -119,8 +119,16 @@
         </form>
         <div class="mode-row">
           <span id="mode" class="mode">检测后端中…</span>
-          <span id="elapsed" class="elapsed"></span>
+          <span class="mode-right">
+            <button type="button" id="token-toggle" class="link-btn" hidden>口令</button>
+            <span id="elapsed" class="elapsed"></span>
+          </span>
         </div>
+        <form id="token-form" class="token-form" hidden>
+          <input id="token-input" type="password" placeholder="输入访问口令" autocomplete="current-password">
+          <button type="submit">保存</button>
+        </form>
+        <div id="token-note" class="token-note" hidden></div>
 
         <div id="answer" class="answer" aria-live="polite">
           <div class="empty-state">

@@ -75,8 +75,18 @@ CHAT_MODEL=Qwen/Qwen3-8B REWRITE_MODEL=Qwen/Qwen2.5-7B-Instruct rag-demo "..."
 ```bash
 curl -s http://127.0.0.1:3000/api/ask \
   -H 'Content-Type: application/json' \
+  -H "Authorization: Bearer $ACCESS_TOKEN" \
   -d '{"question":"怎么把报表导出成 Excel"}' | jq
 ```
+
+### 访问口令
+
+设置 `ACCESS_TOKEN` 后：
+
+- `GET /api/health` 保持公开（用于健康检查）
+- `POST /api/ask`、`POST /api/ask/stream` 需要 `Authorization: Bearer <token>`
+- 网站首次提问会弹出口令输入框，保存在浏览器 localStorage
+- 不设置 `ACCESS_TOKEN` 时关闭鉴权，适合本地开发
 
 SSE 事件顺序：
 
