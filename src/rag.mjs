@@ -16,9 +16,11 @@ export const CONFIG = {
   rerankModel: 'BAAI/bge-reranker-v2-m3',
   rewriteModel: process.env.REWRITE_MODEL || 'Qwen/Qwen2.5-7B-Instruct',
   chatModel: process.env.CHAT_MODEL || 'deepseek-ai/DeepSeek-V3.2',
+  thinkingModel: process.env.THINKING_MODEL || 'Qwen/Qwen3-8B',
   topRecall: 12,
   topRerank: 5,
-  batch: 16
+  batch: 16,
+  thinking: process.env.THINKING !== '0'
 };
 
 const SYSTEM_PROMPT = `你是「青柠笔记」帮助中心的问答助手。严格按以下规则回答：
@@ -28,7 +30,8 @@ const SYSTEM_PROMPT = `你是「青柠笔记」帮助中心的问答助手。严
 4. 如果【资料】中没有答案，只输出“未找到相关内容，建议转人工客服”，不要猜测或补充。
 5. 涉及退款、合同、账号找回、账号被盗、法律、数据泄露时，不做任何承诺，直接说明需转人工客服。
 6. 与产品无关的问题，只输出“未找到相关内容”。
-7. 不要输出资料之外的链接、电话或承诺。`;
+7. 不要输出资料之外的链接、电话或承诺。
+8. 思考过程控制在 120 字以内，只保留关键判断；最终回答不要重复思考内容。`;
 
 function loadEnv() {
   if (process.env.SILICONFLOW_API_KEY) return process.env.SILICONFLOW_API_KEY;
@@ -325,26 +328,34 @@ function ensureCitation(text, top) {
   return `${text}\n\n来源：[1] §${top[0].section} ${top[0].title}`;
 }
 
-export async function answer(question, idx) {
+export async function answer(question, idx, options = {}) {
   const trace = [];
-  const result = await traceStore.run(trace, () => answerInner(question, idx));
+  const result = await traceStore.run(trace, () => answerInner(question, idx, options));
   return { ...result, trace };
 }
 
-async function answerInner(question, idx) {
+async function answerInner(question, idx, { thinking = CONFIG.thinking } = {}) {
   const { candidates, top, searchQuery } = await retrieve(question, idx);
   const context = top.map((c, i) => `[${i + 1}] ${c.text}`).join('\n\n');
   const r = await api('/chat/completions', {
-    model: CONFIG.chatModel,
+    model: thinking ? CONFIG.thinkingModel : CONFIG.chatModel,
     temperature: 0,
     max_tokens: 600,
+    ...(thinking ? { enable_thinking: true } : {}),
     messages: [
       { role: 'system', content: SYSTEM_PROMPT },
       { role: 'user', content: `【检索改写】${searchQuery}\n\n【资料】\n${context}\n\n【问题】${question}` }
     ]
   });
-  const raw = (r.choices?.[0]?.message?.content || '').trim();
-  return { text: ensureCitation(raw, top), candidates, top, searchQuery };
+  const message = r.choices?.[0]?.message || {};
+  const raw = (message.content || '').trim();
+  return {
+    text: ensureCitation(raw, top),
+    reasoning: message.reasoning_content || '',
+    candidates,
+    top,
+    searchQuery
+  };
 }
 
 /**
@@ -356,7 +367,7 @@ export async function answerStream(question, idx, handlers = {}) {
   return { ...result, trace };
 }
 
-async function answerStreamInner(question, idx, { onStatus, onMeta, onToken } = {}) {
+async function answerStreamInner(question, idx, { onStatus, onMeta, onToken, onReasoning, thinking = CONFIG.thinking } = {}) {
   onStatus?.('retrieve');
   const { candidates, top, searchQuery } = await retrieve(question, idx);
   const citations = top.map((c, i) => ({
@@ -380,11 +391,12 @@ async function answerStreamInner(question, idx, { onStatus, onMeta, onToken } = 
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      model: CONFIG.chatModel,
+      model: thinking ? CONFIG.thinkingModel : CONFIG.chatModel,
       temperature: 0,
       max_tokens: 600,
       stream: true,
       stream_options: { include_usage: true },
+      ...(thinking ? { enable_thinking: true } : {}),
       messages: [
         { role: 'system', content: SYSTEM_PROMPT },
         { role: 'user', content: `【检索改写】${searchQuery}\n\n【资料】\n${context}\n\n【问题】${question}` }
@@ -400,6 +412,7 @@ async function answerStreamInner(question, idx, { onStatus, onMeta, onToken } = 
   const decoder = new TextDecoder();
   let buffer = '';
   let text = '';
+  let reasoning = '';
 
   while (true) {
     const { done, value } = await reader.read();
@@ -415,6 +428,11 @@ async function answerStreamInner(question, idx, { onStatus, onMeta, onToken } = 
       try {
         const j = JSON.parse(data);
         if (j.usage) streamUsage = j.usage;
+        const reasoningDelta = j.choices?.[0]?.delta?.reasoning_content || '';
+        if (reasoningDelta) {
+          reasoning += reasoningDelta;
+          onReasoning?.(reasoningDelta);
+        }
         const delta = j.choices?.[0]?.delta?.content || '';
         if (delta) {
           text += delta;
@@ -437,7 +455,7 @@ async function answerStreamInner(question, idx, { onStatus, onMeta, onToken } = 
   const finalText = ensureCitation(text, top);
   if (finalText !== text) onToken?.(finalText.slice(text.length));
 
-  return { text: finalText, citations, rewritten: searchQuery, candidates, top };
+  return { text: finalText, reasoning, citations, rewritten: searchQuery, candidates, top };
 }
 
 export function parseCsv(file) {
@@ -482,7 +500,7 @@ export async function evaluate(n, idx, log = console.log) {
   const results = [];
   for (const row of sample) {
     const expected = row.source_section === '无' ? null : row.source_section.replace('§', '');
-    const { text, candidates, top } = await answer(row.question, idx);
+    const { text, candidates, top } = await answer(row.question, idx, { thinking: false });
     const topSections = top.map(c => c.section);
     const recallSections = candidates.map(c => c.section);
     const r = {

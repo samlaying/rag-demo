@@ -16,11 +16,13 @@ function printTrace(res) {
   trace.forEach((t, i) => {
     const u = t.usage || {};
     const tokens = u.total_tokens ?? u.input_tokens;
+    const reasoningTokens = u.completion_tokens_details?.reasoning_tokens;
     const extra = t.inputs ? ` inputs=${t.inputs}` : Array.isArray(t.documents) ? ` docs=${t.documents}` : '';
     const stream = t.stream ? ' stream' : '';
     console.log(
       `  ${String(i + 1).padStart(2)}. ${t.endpoint.padEnd(20)} ${String(t.model).padEnd(34)} ` +
-      `${String(t.ms).padStart(5)}ms${extra}${stream}${tokens != null ? ` tokens=${tokens}` : ''}`
+      `${String(t.ms).padStart(5)}ms${extra}${stream}${tokens != null ? ` tokens=${tokens}` : ''}` +
+      `${reasoningTokens ? ` reasoning=${reasoningTokens}` : ''}`
     );
   });
   const total = trace.reduce((a, t) => a + t.ms, 0);
@@ -30,6 +32,10 @@ function printTrace(res) {
 function printDemo(question, res, showTrace = false) {
   console.log(`\n问题：${question}`);
   if (res.searchQuery && res.searchQuery !== question) console.log(`检索改写：${res.searchQuery}`);
+  if (res.reasoning) {
+    console.log('\n思考过程：');
+    console.log(res.reasoning.trim());
+  }
   console.log('\n答案：');
   console.log(res.text);
   console.log('\n引用：');
@@ -51,6 +57,7 @@ function usage() {
   rag-demo --index                重建索引
   rag-demo "怎么导出报表"          单问题演示
   rag-demo "怎么导出报表" --trace  显示每次 SiliconFlow 调用
+  rag-demo "怎么导出报表" --no-thinking  关闭思考过程
   rag-demo --eval 12              抽样评测
   rag-demo --eval 100             全量评测
 
@@ -64,7 +71,8 @@ function usage() {
 async function main() {
   const rawArgs = process.argv.slice(2);
   const showTrace = rawArgs.includes('--trace');
-  const args = rawArgs.filter(a => a !== '--trace');
+  const noThinking = rawArgs.includes('--no-thinking');
+  const args = rawArgs.filter(a => a !== '--trace' && a !== '--no-thinking');
   if (args[0] === '--help' || args[0] === '-h') return usage();
   if (args[0] === '--index') {
     await buildIndex();
@@ -84,7 +92,7 @@ async function main() {
     usage();
     process.exit(1);
   }
-  printDemo(question, await answer(question, idx), showTrace);
+  printDemo(question, await answer(question, idx, { thinking: !noThinking }), showTrace);
 }
 
 main().catch(err => {

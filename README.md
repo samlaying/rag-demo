@@ -18,6 +18,7 @@
 - 生成：只依据资料回答，强制 `[n]` 引用；资料没有就说“未找到”；退款/合同/盗号等转人工
 - 评测：100 条问题集，含 20 条口语/错别字、10 条应拒答、5 条应转人工
 - 可观测：每次回答记录 **6 次 SiliconFlow 调用**（改写 / 2×embedding / 2×rerank / 生成），CLI 和网站都能看到
+- 可解释：模型思考过程（`reasoning_content`）流式展示在回答上方，并输出到浏览器 console
 - 网站：实时 SSE 流式回答 + 证据链 + 调用链面板
 
 模型全部走 [SiliconFlow](https://siliconflow.cn)：
@@ -52,6 +53,7 @@ npm link                 # 安装为全局命令
 rag-demo --index
 rag-demo "小书怎么发"
 rag-demo "小书怎么发" --trace   # 打印 6 次 SiliconFlow 调用与耗时
+rag-demo "小书怎么发" --no-thinking  # 关闭思考过程
 rag-demo --eval 100
 rag-demo --help
 ```
@@ -93,6 +95,7 @@ SSE 事件顺序：
 ```
 event: status  {"stage":"retrieve"}
 event: meta    {"rewritten":"...","citations":[...]}
+event: reasoning {"text":"用户问的是..."}
 event: token   {"text":"在"}
 ...
 event: done    {"elapsedMs":7392,"trace":[{"endpoint":"/chat/completions","model":"deepseek-ai/DeepSeek-V3.2","ms":6627}]}
@@ -137,6 +140,26 @@ GitHub Pages 只能跑静态演示；实时问答需要一个 Node 后端。
 - `window.__RAG_LAST__` 保存最后一次的 question / rewritten / citations / trace / answer
 - URL 加 `?debug=1` 会额外输出每个 token，便于排查流式输出
 - 静态模式会输出 `[RAG·静态]` 分组，标明用的是预生成数据
+
+## 思考过程
+
+默认开启（`THINKING=1`），使用 `Qwen/Qwen3-8B` 的 thinking 模式完成分析与回答；关闭后回退到 `DeepSeek-V3.2` 的非思考模式。
+
+| 位置 | 表现 |
+|---|---|
+| 网站 | 回答上方「思考过程」折叠面板，流式更新 |
+| 浏览器 Console | `reasoning:` 完整内容 + 调用表 `reasoningTokens` 列 |
+| SSE | `event: reasoning`，逐段返回 |
+| CLI | 默认打印「思考过程」；`--no-thinking` 关闭 |
+
+配置：
+
+```bash
+THINKING=0                       # 关闭
+THINKING_MODEL=Qwen/Qwen3-8B     # 换思考模型
+```
+
+评测（`--eval`）自动关闭 thinking，避免变慢。
 
 ## 评测
 

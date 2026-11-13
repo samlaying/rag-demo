@@ -89,9 +89,11 @@ const server = http.createServer(async (req, res) => {
       models: {
         embed: CONFIG.embedModel,
         rerank: CONFIG.rerankModel,
-        chat: CONFIG.chatModel
+        chat: CONFIG.chatModel,
+        thinkingModel: CONFIG.thinkingModel
       },
-      authRequired: Boolean(ACCESS_TOKEN)
+      authRequired: Boolean(ACCESS_TOKEN),
+      thinking: CONFIG.thinking
     });
   }
 
@@ -120,6 +122,7 @@ const server = http.createServer(async (req, res) => {
       const result = await answerStream(question, idx, {
         onStatus: stage => sendEvent('status', { stage }),
         onMeta: meta => sendEvent('meta', meta),
+        onReasoning: delta => sendEvent('reasoning', { text: delta }),
         onToken: delta => sendEvent('token', { text: delta })
       });
       sendEvent('done', { elapsedMs: Date.now() - started, trace: result.trace });
@@ -146,6 +149,7 @@ const server = http.createServer(async (req, res) => {
         question,
         rewritten: r.searchQuery,
         answer: r.text,
+        reasoning: r.reasoning,
         citations: r.top.map((c, i) => ({
           n: i + 1,
           section: c.section,

@@ -160,6 +160,9 @@ function renderTrace(trace) {
 
 function setLoading(stage = 'retrieve') {
   const label = stage === 'generate' ? '生成答案中…' : '检索与重排中…';
+  $('#reasoning-box').hidden = true;
+  $('#reasoning-box').open = false;
+  $('#reasoning-text').textContent = '';
   $('#answer').innerHTML = `
     <div class="stream-status">
       <span class="spinner"></span>
@@ -202,6 +205,7 @@ async function askLive(q) {
   let firstTokenAt = 0;
   let meta = { citations: [], rewritten: '' };
   let text = '';
+  let reasoning = '';
 
   console.groupCollapsed(`%c[RAG] ${q}`, 'color:#0f766e;font-weight:700');
   console.log('question:', q);
@@ -273,6 +277,15 @@ async function askLive(q) {
             rerank: Number(c.rerank).toFixed(3),
             sim: Number(c.sim).toFixed(3)
           })));
+        } else if (event === 'reasoning') {
+          reasoning += payload.text || '';
+          const box = $('#reasoning-box');
+          if (box.hidden) {
+            box.hidden = false;
+            box.open = true;
+          }
+          $('#reasoning-text').textContent = reasoning;
+          if (DEBUG) console.debug('[reasoning]', JSON.stringify(payload.text));
         } else if (event === 'token') {
           text += payload.text || '';
           if (!firstTokenAt) {
@@ -287,6 +300,7 @@ async function askLive(q) {
           renderTrace(payload.trace);
           const total = performance.now() - startedAt;
           console.log('answer:', text);
+          console.log('reasoning:', reasoning || '(模型未返回思考过程)');
           if (payload.trace) {
             console.table(payload.trace.map((t, i) => ({
               step: i + 1,
@@ -295,7 +309,8 @@ async function askLive(q) {
               ms: t.ms,
               inputs: t.inputs ?? '',
               docs: t.documents ?? '',
-              tokens: t.usage?.total_tokens ?? t.usage?.input_tokens ?? ''
+              tokens: t.usage?.total_tokens ?? t.usage?.input_tokens ?? '',
+              reasoningTokens: t.usage?.completion_tokens_details?.reasoning_tokens ?? ''
             })));
           }
           console.log(`[完成] ${total.toFixed(0)}ms · ${payload.trace?.length || 0} 次 SiliconFlow 调用 · ${text.length} 字`);
@@ -305,6 +320,7 @@ async function askLive(q) {
             citations: meta.citations,
             trace: payload.trace,
             answer: text,
+            reasoning,
             elapsedMs: payload.elapsedMs
           };
         } else if (event === 'error') {
