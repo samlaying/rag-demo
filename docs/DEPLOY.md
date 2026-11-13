@@ -1,5 +1,14 @@
 # 部署：免费后端方案（2026-11）
 
+## 当前部署
+
+| 用途 | 地址 |
+|---|---|
+| 实时后端（Render Free） | <https://rag-demo-c2ns.onrender.com> |
+| 静态站点（GitHub Pages） | <https://samlaying.github.io/rag-demo/> |
+
+Render 免费实例 15 分钟无流量会休眠，首次访问约 50 秒冷启动。演示前先打开一次预热。
+
 这个项目是 **Node 常驻进程 + SSE 流式 + 4.6MB 本地索引**，所以纯静态托管（GitHub Pages）只能跑演示数据，实时问答必须有一个能跑 Node 的后端。
 
 下面按“改动量”排序。

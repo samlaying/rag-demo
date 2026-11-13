@@ -4,6 +4,9 @@
 
 一套代码，三种用法：**CLI**、**HTTP API**、**可部署的网站**。
 
+**在线演示：** <https://rag-demo-c2ns.onrender.com>（Render Free，15 分钟无访问会休眠，首次打开约 50 秒）
+**静态站点：** <https://samlaying.github.io/rag-demo/>
+
 ![演示页面](docs/demo.png)
 
 ## 这是什么
