@@ -14,6 +14,7 @@ const FALLBACK_PRESETS = [
 ];
 
 const TOKEN_KEY = 'rag_demo_token';
+const DEBUG = new URLSearchParams(location.search).has('debug');
 const getToken = () => localStorage.getItem(TOKEN_KEY) || '';
 const setToken = t => t ? localStorage.setItem(TOKEN_KEY, t) : localStorage.removeItem(TOKEN_KEY);
 
@@ -197,76 +198,128 @@ function setElapsed(ms) {
 }
 
 async function askLive(q) {
-  const token = getToken();
-  const res = await fetch('/api/ask/stream', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {})
-    },
-    body: JSON.stringify({ question: q })
-  });
-
-  if (res.status === 401) {
-    showTokenForm(true, '访问口令不正确，请重新输入');
-    throw new Error('需要访问口令');
-  }
-
-  if (!res.ok) {
-    let message = `请求失败 (${res.status})`;
-    try { message = (await res.json()).error || message; } catch { /* ignore */ }
-    throw new Error(message);
-  }
-
-  const reader = res.body.getReader();
-  const decoder = new TextDecoder();
-  let buffer = '';
-  let text = '';
+  const startedAt = performance.now();
+  let firstTokenAt = 0;
   let meta = { citations: [], rewritten: '' };
-  let gotMeta = false;
+  let text = '';
 
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    buffer += decoder.decode(value, { stream: true });
+  console.groupCollapsed(`%c[RAG] ${q}`, 'color:#0f766e;font-weight:700');
+  console.log('question:', q);
+  console.log('mode:', 'live SSE');
 
-    const chunks = buffer.split('\n\n');
-    buffer = chunks.pop() || '';
+  try {
+    const token = getToken();
+    const res = await fetch('/api/ask/stream', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {})
+      },
+      body: JSON.stringify({ question: q })
+    });
 
-    for (const chunk of chunks) {
-      let event = 'message';
-      let data = '';
-      for (const line of chunk.split('\n')) {
-        if (line.startsWith('event:')) event = line.slice(6).trim();
-        else if (line.startsWith('data:')) data += line.slice(5).trim();
-      }
-      if (!data) continue;
+    if (res.status === 401) {
+      showTokenForm(true, '访问口令不正确，请重新输入');
+      throw new Error('需要访问口令');
+    }
 
-      let payload;
-      try { payload = JSON.parse(data); } catch { continue; }
+    if (!res.ok) {
+      let message = `请求失败 (${res.status})`;
+      try { message = (await res.json()).error || message; } catch { /* ignore */ }
+      throw new Error(message);
+    }
 
-      if (event === 'status') {
-        // meta 到达后不再重置，否则会把引用和证据链清空
-        if (!gotMeta) setLoading(payload.stage);
-      } else if (event === 'meta') {
-        meta = payload;
-        gotMeta = true;
-        paintStream(meta, '', { cursor: true });
-        renderEvidence(meta.citations);
-      } else if (event === 'token') {
-        text += payload.text || '';
-        paintStream(meta, text, { cursor: true });
-      } else if (event === 'done') {
-        setElapsed(payload.elapsedMs);
-        paintStream(meta, text, { cursor: false });
-        renderTrace(payload.trace);
-      } else if (event === 'error') {
-        throw new Error(payload.message || '生成失败');
+    console.log(`[连接] ${(performance.now() - startedAt).toFixed(0)}ms`);
+
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+    let gotMeta = false;
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+
+      const chunks = buffer.split('\n\n');
+      buffer = chunks.pop() || '';
+
+      for (const chunk of chunks) {
+        let event = 'message';
+        let data = '';
+        for (const line of chunk.split('\n')) {
+          if (line.startsWith('event:')) event = line.slice(6).trim();
+          else if (line.startsWith('data:')) data += line.slice(5).trim();
+        }
+        if (!data) continue;
+
+        let payload;
+        try { payload = JSON.parse(data); } catch { continue; }
+
+        if (event === 'status') {
+          if (!gotMeta) setLoading(payload.stage);
+          if (DEBUG) console.log(`[status] ${payload.stage} @ ${(performance.now() - startedAt).toFixed(0)}ms`);
+        } else if (event === 'meta') {
+          meta = payload;
+          gotMeta = true;
+          paintStream(meta, '', { cursor: true });
+          renderEvidence(meta.citations);
+          console.log(`[检索] ${(performance.now() - startedAt).toFixed(0)}ms`);
+          console.log('检索改写:', meta.rewritten || '(未改写)');
+          console.table((meta.citations || []).map(c => ({
+            n: c.n,
+            section: '§' + c.section,
+            title: c.title,
+            rerank: Number(c.rerank).toFixed(3),
+            sim: Number(c.sim).toFixed(3)
+          })));
+        } else if (event === 'token') {
+          text += payload.text || '';
+          if (!firstTokenAt) {
+            firstTokenAt = performance.now();
+            console.log(`[首字] ${(firstTokenAt - startedAt).toFixed(0)}ms`);
+          }
+          if (DEBUG) console.debug('[token]', JSON.stringify(payload.text));
+          paintStream(meta, text, { cursor: true });
+        } else if (event === 'done') {
+          setElapsed(payload.elapsedMs);
+          paintStream(meta, text, { cursor: false });
+          renderTrace(payload.trace);
+          const total = performance.now() - startedAt;
+          console.log('answer:', text);
+          if (payload.trace) {
+            console.table(payload.trace.map((t, i) => ({
+              step: i + 1,
+              endpoint: t.endpoint,
+              model: t.model,
+              ms: t.ms,
+              inputs: t.inputs ?? '',
+              docs: t.documents ?? '',
+              tokens: t.usage?.total_tokens ?? t.usage?.input_tokens ?? ''
+            })));
+          }
+          console.log(`[完成] ${total.toFixed(0)}ms · ${payload.trace?.length || 0} 次 SiliconFlow 调用 · ${text.length} 字`);
+          window.__RAG_LAST__ = {
+            question: q,
+            rewritten: meta.rewritten,
+            citations: meta.citations,
+            trace: payload.trace,
+            answer: text,
+            elapsedMs: payload.elapsedMs
+          };
+        } else if (event === 'error') {
+          throw new Error(payload.message || '生成失败');
+        }
       }
     }
-  }
 
-  if (!gotMeta) throw new Error('没有拿到检索结果');
+    if (!gotMeta) throw new Error('没有拿到检索结果');
+  } catch (err) {
+    console.error('[RAG] 失败:', err.message);
+    throw err;
+  } finally {
+    console.groupEnd();
+  }
 }
 
 async function ask(question) {
@@ -283,11 +336,24 @@ async function ask(question) {
     } else {
       const data = findDemo(q);
       if (!data) throw new Error('这个问题不在静态示例里');
+      console.groupCollapsed(`%c[RAG·静态] ${q}`, 'color:#b45309;font-weight:700');
+      console.log('answer:', data.answer);
+      console.log('检索改写:', data.rewritten || '(未改写)');
+      console.table((data.citations || []).map(c => ({
+        n: c.n,
+        section: '§' + c.section,
+        title: c.title,
+        rerank: Number(c.rerank).toFixed(3),
+        sim: Number(c.sim).toFixed(3)
+      })));
+      console.groupEnd();
+      window.__RAG_LAST__ = data;
       renderAnswer(data);
       renderEvidence(data.citations);
       setElapsed(data.elapsedMs);
     }
   } catch (err) {
+    console.error('[RAG] 请求失败:', err.message);
     setError(err.message || '请求失败');
   } finally {
     btn.disabled = false;

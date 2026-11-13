@@ -114,6 +114,30 @@ GitHub Pages 只能跑静态演示；实时问答需要一个 Node 后端。
 - 最快路径：Render → **New Blueprint** → 连接本仓库 → 填 `SILICONFLOW_API_KEY`
 - 仓库已带 `Dockerfile`、`render.yaml`，索引预构建在 `data/index.json`，冷启动不需要重新 embedding
 
+## 浏览器 Console
+
+打开 DevTools → Console，每次提问会输出完整链路：
+
+```
+▼ [RAG] 怎么把报表导出成 Excel
+    question: ...
+    mode: live SSE
+    [连接] 14ms
+    [status] retrieve @ 14ms
+    [检索] 1020ms
+    检索改写: 如何将报表导出为Excel
+    ▦ table  召回证据（section / title / rerank / sim）
+    [status] generate @ 1021ms
+    [首字] 2265ms
+    answer: ...
+    ▦ table  6 次 SiliconFlow 调用（endpoint / model / ms / tokens）
+    [完成] 8.7s · 6 次调用 · 221 字
+```
+
+- `window.__RAG_LAST__` 保存最后一次的 question / rewritten / citations / trace / answer
+- URL 加 `?debug=1` 会额外输出每个 token，便于排查流式输出
+- 静态模式会输出 `[RAG·静态]` 分组，标明用的是预生成数据
+
 ## 评测
 
 12 条抽样（覆盖 howto / troubleshoot / feature / colloquial / version / out_of_scope / handoff）：
