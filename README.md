@@ -117,6 +117,18 @@ GitHub Pages 只能跑静态演示；实时问答需要一个 Node 后端。
 - 最快路径：Render → **New Blueprint** → 连接本仓库 → 填 `SILICONFLOW_API_KEY`
 - 仓库已带 `Dockerfile`、`render.yaml`，索引预构建在 `data/index.json`，冷启动不需要重新 embedding
 
+## 引用预览
+
+回答里的 `[1]` 和引用来源列表都可以点击，右侧滑出原文抽屉：
+
+- **命中片段**：本次检索实际命中的 chunk
+- **完整小节**：从原文 HTML 解析出的该节全文
+- **打开完整 PDF**：按小节映射到对应页码（如 §5.3 → 第 10 页）
+- **HTML 原文**：跳转到 `#s5-3` 锚点
+- `Esc`、点击遮罩或 `✕` 关闭；移动端自动全屏
+
+![引用预览抽屉](docs/source-drawer.png)
+
 ## 浏览器 Console
 
 打开 DevTools → Console，每次提问会输出完整链路：

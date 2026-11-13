@@ -19,6 +19,11 @@ const getToken = () => localStorage.getItem(TOKEN_KEY) || '';
 const setToken = t => t ? localStorage.setItem(TOKEN_KEY, t) : localStorage.removeItem(TOKEN_KEY);
 
 let currentQuestion = '';
+let lastCitations = [];
+let docCache = null;
+let pageMap = null;
+let closeTimer = null;
+let lastFocus = null;
 
 function showTokenForm(show, note = '') {
   $('#token-form').hidden = !show;
@@ -40,7 +45,7 @@ function renderText(text) {
   return esc(text)
     .split(/\n{2,}/)
     .filter(Boolean)
-    .map(p => `<p>${p.replace(/\n/g, '<br>').replace(/\[(\d+)\]/g, '<span class="cite">[$1]</span>')}</p>`)
+    .map(p => `<p>${p.replace(/\n/g, '<br>').replace(/\[(\d+)\]/g, '<button type="button" class="cite" data-cite="$1">[$1]</button>')}</p>`)
     .join('');
 }
 
@@ -51,7 +56,7 @@ function citationsHtml(citations) {
     <div class="citations">
       <h4>引用来源</h4>
       ${list.map(c => `
-        <div class="cite-item">
+        <div class="cite-item" data-cite="${c.n}" role="button" tabindex="0">
           <div class="cite-top">
             <span class="cite-n">[${c.n}]</span>
             <span class="cite-sec">§${esc(c.section)}</span>
@@ -59,7 +64,7 @@ function citationsHtml(citations) {
           </div>
           <div class="cite-meta">
             rerank ${Number(c.rerank).toFixed(3)} · sim ${Number(c.sim).toFixed(3)}
-            ${c.url ? ` · <a href="${esc(c.url)}" target="_blank" rel="noreferrer">查看原文</a>` : ''}
+            · <span class="cite-preview">预览原文 →</span>
           </div>
         </div>
       `).join('')}
@@ -104,6 +109,7 @@ function findDemo(question) {
 }
 
 function renderAnswer(data) {
+  lastCitations = data.citations || [];
   const rewritten = data.rewritten && data.rewritten !== data.question
     ? `<span class="rewrite">检索改写：${esc(data.rewritten)}</span>`
     : '';
@@ -200,6 +206,87 @@ function setElapsed(ms) {
   $('#elapsed').textContent = ms ? `${(ms / 1000).toFixed(1)}s` : '';
 }
 
+async function loadDoc() {
+  if (docCache) return docCache;
+  const res = await fetch('./doc/help-center.html', { cache: 'force-cache' });
+  if (!res.ok) throw new Error('原文加载失败');
+  docCache = new DOMParser().parseFromString(await res.text(), 'text/html');
+  return docCache;
+}
+
+async function getPageMap() {
+  if (pageMap) return pageMap;
+  try {
+    const res = await fetch('./doc/pages.json', { cache: 'force-cache' });
+    pageMap = res.ok ? await res.json() : {};
+  } catch {
+    pageMap = {};
+  }
+  return pageMap;
+}
+
+async function openSource(n) {
+  const citation = lastCitations.find(c => Number(c.n) === Number(n));
+  if (!citation) return;
+
+  const overlay = $('#source-overlay');
+  const drawer = $('#source-drawer');
+  lastFocus = document.activeElement;
+  clearTimeout(closeTimer);
+  overlay.hidden = false;
+  drawer.hidden = false;
+  requestAnimationFrame(() => drawer.classList.add('open'));
+  document.body.style.overflow = 'hidden';
+
+  $('#source-kicker').textContent = `§${citation.section}`;
+  $('#source-title').textContent = citation.title;
+  $('#source-body').innerHTML = '<div class="source-loading">加载原文…</div>';
+  $('#source-close').focus();
+
+  try {
+    const [doc, pages] = await Promise.all([loadDoc(), getPageMap()]);
+    const el = doc.querySelector(`#s${citation.section.replace('.', '-')}`);
+    if (!el) throw new Error('原文中找不到该小节');
+
+    const chapterTitle = (el.closest('section')?.querySelector('h1')?.textContent?.trim() || '')
+      .replace(/^\d+[　\s]+/, '');
+    if (chapterTitle) $('#source-kicker').textContent = `§${citation.section} · ${chapterTitle}`;
+
+    const wrap = document.createElement('div');
+    let node = el.nextElementSibling;
+    while (node && !['H1', 'H2', 'SECTION'].includes(node.tagName)) {
+      wrap.appendChild(node.cloneNode(true));
+      node = node.nextElementSibling;
+    }
+
+    const hitText = citation.text
+      ? citation.text.replace(/^§[\d.]+\s+[^\n]*\n+/, '').slice(0, 700)
+      : '';
+    const hit = hitText
+      ? `<div class="hit"><div class="hit-label">命中片段</div><p>${esc(hitText).replace(/\n/g, '<br>')}</p></div>`
+      : '';
+    $('#source-body').innerHTML = hit + wrap.innerHTML;
+
+    const page = pages[citation.section] || 1;
+    $('#source-pdf').href = `./doc/help-center.pdf#page=${page}`;
+    $('#source-html').href = `./doc/help-center.html#s${citation.section.replace('.', '-')}`;
+  } catch (err) {
+    $('#source-body').innerHTML = `<div class="source-loading">${esc(err.message)}</div>`;
+  }
+}
+
+function closeSource() {
+  const drawer = $('#source-drawer');
+  drawer.classList.remove('open');
+  document.body.style.overflow = '';
+  clearTimeout(closeTimer);
+  closeTimer = setTimeout(() => {
+    drawer.hidden = true;
+    $('#source-overlay').hidden = true;
+  }, 200);
+  lastFocus?.focus?.();
+}
+
 async function askLive(q) {
   const startedAt = performance.now();
   let firstTokenAt = 0;
@@ -266,6 +353,7 @@ async function askLive(q) {
         } else if (event === 'meta') {
           meta = payload;
           gotMeta = true;
+          lastCitations = meta.citations || [];
           paintStream(meta, '', { cursor: true });
           renderEvidence(meta.citations);
           console.log(`[检索] ${(performance.now() - startedAt).toFixed(0)}ms`);
@@ -432,5 +520,27 @@ $('#token-form').addEventListener('submit', e => {
 $('#token-toggle').addEventListener('click', () => {
   showTokenForm($('#token-form').hidden);
 });
+
+document.addEventListener('click', e => {
+  const cite = e.target.closest?.('[data-cite]');
+  if (cite) {
+    e.preventDefault();
+    openSource(cite.dataset.cite);
+  }
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && !$('#source-drawer').hidden) {
+    closeSource();
+    return;
+  }
+  if ((e.key === 'Enter' || e.key === ' ') && e.target?.matches?.('[data-cite]')) {
+    e.preventDefault();
+    openSource(e.target.dataset.cite);
+  }
+});
+
+$('#source-close').addEventListener('click', closeSource);
+$('#source-overlay').addEventListener('click', closeSource);
 
 init();

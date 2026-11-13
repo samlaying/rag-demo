@@ -156,7 +156,8 @@ const server = http.createServer(async (req, res) => {
           title: c.title,
           url: c.url,
           rerank: c.rerank,
-          sim: c.sim
+          sim: c.sim,
+          text: c.text
         })),
         elapsedMs: Date.now() - started,
         trace: r.trace
