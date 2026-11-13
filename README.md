@@ -14,7 +14,8 @@
 - 检索：向量召回 + BM25 分词召回，RRF 融合；原始问题与改写问题**各召回、各 rerank 一次取高分**
 - 生成：只依据资料回答，强制 `[n]` 引用；资料没有就说“未找到”；退款/合同/盗号等转人工
 - 评测：100 条问题集，含 20 条口语/错别字、10 条应拒答、5 条应转人工
-- 网站：实时 SSE 流式回答 + 证据链面板
+- 可观测：每次回答记录 **6 次 SiliconFlow 调用**（改写 / 2×embedding / 2×rerank / 生成），CLI 和网站都能看到
+- 网站：实时 SSE 流式回答 + 证据链 + 调用链面板
 
 模型全部走 [SiliconFlow](https://siliconflow.cn)：
 
@@ -47,6 +48,7 @@ npm start                     # 网站：http://127.0.0.1:3000
 npm link                 # 安装为全局命令
 rag-demo --index
 rag-demo "小书怎么发"
+rag-demo "小书怎么发" --trace   # 打印 6 次 SiliconFlow 调用与耗时
 rag-demo --eval 100
 rag-demo --help
 ```
@@ -80,7 +82,7 @@ event: status  {"stage":"retrieve"}
 event: meta    {"rewritten":"...","citations":[...]}
 event: token   {"text":"在"}
 ...
-event: done    {"elapsedMs":7392}
+event: done    {"elapsedMs":7392,"trace":[{"endpoint":"/chat/completions","model":"deepseek-ai/DeepSeek-V3.2","ms":6627}]}
 ```
 
 ## 网站

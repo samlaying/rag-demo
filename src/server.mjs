@@ -105,12 +105,12 @@ const server = http.createServer(async (req, res) => {
     const started = Date.now();
 
     try {
-      await answerStream(question, idx, {
+      const result = await answerStream(question, idx, {
         onStatus: stage => sendEvent('status', { stage }),
         onMeta: meta => sendEvent('meta', meta),
         onToken: delta => sendEvent('token', { text: delta })
       });
-      sendEvent('done', { elapsedMs: Date.now() - started });
+      sendEvent('done', { elapsedMs: Date.now() - started, trace: result.trace });
     } catch (err) {
       sendEvent('error', { message: err.message });
     } finally {
@@ -141,7 +141,8 @@ const server = http.createServer(async (req, res) => {
           rerank: c.rerank,
           sim: c.sim
         })),
-        elapsedMs: Date.now() - started
+        elapsedMs: Date.now() - started,
+        trace: r.trace
       });
     } catch (err) {
       return send(res, 500, { ok: false, error: err.message });

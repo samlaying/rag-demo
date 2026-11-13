@@ -130,6 +130,22 @@ function renderEvidence(citations) {
   }).join('');
 }
 
+function renderTrace(trace) {
+  const box = $('#trace');
+  if (!trace?.length) {
+    box.innerHTML = '';
+    return;
+  }
+  box.innerHTML = `
+    <div class="trace-title">LLM 调用 · ${trace.length} 次 · SiliconFlow</div>
+    ${trace.map((t, i) => `
+      <div class="trace-row">
+        <span>${i + 1}</span>
+        <span class="trace-ep" title="${esc(t.model || '')}">${esc(t.endpoint)}</span>
+        <span class="trace-ms">${t.ms}ms</span>
+      </div>`).join('')}`;
+}
+
 function setLoading(stage = 'retrieve') {
   const label = stage === 'generate' ? '生成答案中…' : '检索与重排中…';
   $('#answer').innerHTML = `
@@ -141,6 +157,7 @@ function setLoading(stage = 'retrieve') {
     <div class="loading">
       <i></i><i></i><i></i><i></i>
     </div>`;
+  $('#trace').innerHTML = '';
   $('#elapsed').textContent = '';
 }
 
@@ -222,6 +239,7 @@ async function askLive(q) {
       } else if (event === 'done') {
         setElapsed(payload.elapsedMs);
         paintStream(meta, text, { cursor: false });
+        renderTrace(payload.trace);
       } else if (event === 'error') {
         throw new Error(payload.message || '生成失败');
       }

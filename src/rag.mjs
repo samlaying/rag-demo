@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
+import { AsyncLocalStorage } from 'node:async_hooks';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -42,10 +43,12 @@ function loadEnv() {
 }
 
 const KEY = loadEnv();
+const traceStore = new AsyncLocalStorage();
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 async function api(pathname, body, { retries = 3 } = {}) {
   for (let attempt = 0; ; attempt++) {
+    const startedAt = Date.now();
     let res, text;
     try {
       res = await fetch(CONFIG.base + pathname, {
@@ -64,7 +67,23 @@ async function api(pathname, body, { retries = 3 } = {}) {
       }
       throw new Error(`${pathname} 网络错误: ${err.message}`);
     }
-    if (res.ok) return JSON.parse(text);
+    if (res.ok) {
+      const result = JSON.parse(text);
+      const trace = traceStore.getStore();
+      if (trace) {
+        trace.push({
+          endpoint: pathname,
+          model: body.model,
+          ms: Date.now() - startedAt,
+          ...(body.input !== undefined && {
+            inputs: Array.isArray(body.input) ? body.input.length : 1
+          }),
+          ...(Array.isArray(body.documents) && { documents: body.documents.length }),
+          usage: result.usage || result.meta?.tokens || null
+        });
+      }
+      return result;
+    }
     if (attempt < retries && (res.status === 429 || res.status >= 500)) {
       await sleep(1500 * (attempt + 1));
       continue;
@@ -307,6 +326,12 @@ function ensureCitation(text, top) {
 }
 
 export async function answer(question, idx) {
+  const trace = [];
+  const result = await traceStore.run(trace, () => answerInner(question, idx));
+  return { ...result, trace };
+}
+
+async function answerInner(question, idx) {
   const { candidates, top, searchQuery } = await retrieve(question, idx);
   const context = top.map((c, i) => `[${i + 1}] ${c.text}`).join('\n\n');
   const r = await api('/chat/completions', {
@@ -325,7 +350,13 @@ export async function answer(question, idx) {
 /**
  * 流式版本：先完成检索并回调 citations，再逐 token 输出答案。
  */
-export async function answerStream(question, idx, { onStatus, onMeta, onToken } = {}) {
+export async function answerStream(question, idx, handlers = {}) {
+  const trace = [];
+  const result = await traceStore.run(trace, () => answerStreamInner(question, idx, handlers));
+  return { ...result, trace };
+}
+
+async function answerStreamInner(question, idx, { onStatus, onMeta, onToken } = {}) {
   onStatus?.('retrieve');
   const { candidates, top, searchQuery } = await retrieve(question, idx);
   const citations = top.map((c, i) => ({
@@ -340,6 +371,8 @@ export async function answerStream(question, idx, { onStatus, onMeta, onToken } 
 
   onStatus?.('generate');
   const context = top.map((c, i) => `[${i + 1}] ${c.text}`).join('\n\n');
+  const streamStarted = Date.now();
+  let streamUsage = null;
   const res = await fetch(CONFIG.base + '/chat/completions', {
     method: 'POST',
     headers: {
@@ -351,6 +384,7 @@ export async function answerStream(question, idx, { onStatus, onMeta, onToken } 
       temperature: 0,
       max_tokens: 600,
       stream: true,
+      stream_options: { include_usage: true },
       messages: [
         { role: 'system', content: SYSTEM_PROMPT },
         { role: 'user', content: `【检索改写】${searchQuery}\n\n【资料】\n${context}\n\n【问题】${question}` }
@@ -380,6 +414,7 @@ export async function answerStream(question, idx, { onStatus, onMeta, onToken } 
       if (!data || data === '[DONE]') continue;
       try {
         const j = JSON.parse(data);
+        if (j.usage) streamUsage = j.usage;
         const delta = j.choices?.[0]?.delta?.content || '';
         if (delta) {
           text += delta;
@@ -390,6 +425,14 @@ export async function answerStream(question, idx, { onStatus, onMeta, onToken } 
       }
     }
   }
+
+  traceStore.getStore()?.push({
+    endpoint: '/chat/completions',
+    model: CONFIG.chatModel,
+    ms: Date.now() - streamStarted,
+    stream: true,
+    usage: streamUsage
+  });
 
   const finalText = ensureCitation(text, top);
   if (finalText !== text) onToken?.(finalText.slice(text.length));
