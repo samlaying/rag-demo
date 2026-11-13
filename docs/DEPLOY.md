@@ -47,7 +47,7 @@ Render 免费实例 15 分钟无流量会休眠，首次访问约 50 秒冷启�
 1. 打开 [Render Dashboard](https://dashboard.render.com/) → **New** → **Blueprint**
 2. 连接 GitHub 仓库 `samlaying/rag-demo`
 3. 应用 `render.yaml`
-4. 在环境变量里填 `SILICONFLOW_API_KEY`（不要写进仓库）
+4. 在环境变量里填 `SILICONFLOW_API_KEY` 和 `ACCESS_TOKEN`（访问口令，不写进仓库）
 5. 部署完成后访问 `https://<service>.onrender.com`
 
 注意：
@@ -104,6 +104,8 @@ gcloud run deploy rag-demo --source . --set-secrets SILICONFLOW_API_KEY=siliconf
 ## 运维要点
 
 - **Key 只在服务端环境变量**，前端永远不出现
+- `ACCESS_TOKEN` 控制 `/api/ask` 与 `/api/ask/stream`；`/api/health` 保持公开
+- 更换口令：改 Render 的 `ACCESS_TOKEN` 并重新部署即可
 - 索引已预构建在 `data/index.json`（4.6MB），冷启动不会重新 embedding
 - 健康检查：`GET /api/health`
 - 免费实例休眠：演示前预热；或加定时 ping
