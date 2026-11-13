@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: rag-demo
+    runtime: node
+    plan: free
+    region: oregon
+    buildCommand: "echo skip build"
+    startCommand: "node src/server.mjs"
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: SILICONFLOW_API_KEY
+        sync: false

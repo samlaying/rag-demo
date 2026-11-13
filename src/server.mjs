@@ -155,7 +155,7 @@ const server = http.createServer(async (req, res) => {
   return serveStatic(req, res);
 });
 
-server.listen(PORT, '127.0.0.1', () => {
-  console.log(`RAG demo running at http://127.0.0.1:${PORT}`);
+server.listen(PORT, process.env.HOST || '0.0.0.0', () => {
+  console.log(`RAG demo running at http://${process.env.HOST || '0.0.0.0'}:${PORT}`);
   console.log(`chunks=${idx.chunks.length} dim=${idx.dim}`);
 });

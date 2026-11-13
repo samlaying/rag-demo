@@ -91,6 +91,14 @@ event: done    {"elapsedMs":7392}
 - 证据链面板展示每个 chunk 的 rerank / sim 分数
 - 可直接部署到 GitHub Pages；实时提问需要另跑 `npm start`
 
+## 部署（免费后端）
+
+GitHub Pages 只能跑静态演示；实时问答需要一个 Node 后端。
+
+- 免费方案对比（Render / Koyeb / Cloud Run / Workers / 国内云）：[docs/DEPLOY.md](docs/DEPLOY.md)
+- 最快路径：Render → **New Blueprint** → 连接本仓库 → 填 `SILICONFLOW_API_KEY`
+- 仓库已带 `Dockerfile`、`render.yaml`，索引预构建在 `data/index.json`，冷启动不需要重新 embedding
+
 ## 评测
 
 12 条抽样（覆盖 howto / troubleshoot / feature / colloquial / version / out_of_scope / handoff）：

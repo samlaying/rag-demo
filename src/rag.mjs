@@ -178,10 +178,13 @@ export async function buildIndex(log = console.error) {
 }
 
 export async function getIndex() {
-  if (fs.existsSync(INDEX_FILE)) {
-    const idx = JSON.parse(fs.readFileSync(INDEX_FILE, 'utf8'));
-    const html = fs.readFileSync(path.join(DATA_DIR, 'help-center.html'), 'utf8');
-    if (idx.hash === sourceHash(html) && idx.model === CONFIG.embedModel) return idx;
+  const html = fs.readFileSync(path.join(DATA_DIR, 'help-center.html'), 'utf8');
+  const hash = sourceHash(html);
+  // 优先读仓库里预构建的索引，避免部署后冷启动重新 embedding
+  for (const file of [path.join(DATA_DIR, 'index.json'), INDEX_FILE]) {
+    if (!fs.existsSync(file)) continue;
+    const idx = JSON.parse(fs.readFileSync(file, 'utf8'));
+    if (idx.hash === hash && idx.model === CONFIG.embedModel) return idx;
   }
   return buildIndex();
 }
